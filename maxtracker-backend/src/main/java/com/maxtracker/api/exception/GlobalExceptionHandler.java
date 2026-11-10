@@ -2,11 +2,11 @@ package com.maxtracker.api.exception;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +16,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -38,9 +39,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage() + ". Intenta nuevamente en unos minutos.", "wger-no-disponible");
     }
 
-    @ExceptionHandler(EjercicioNoEncontradoException.class)
-    public ProblemDetail manejarNoEncontrado(EjercicioNoEncontradoException ex) {
+    /** Incluye {@link EjercicioNoEncontradoException}. */
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ProblemDetail manejarNoEncontrado(RecursoNoEncontradoException ex) {
         return problema(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage(), "no-encontrado");
+    }
+
+    @ExceptionHandler(SesionFinalizadaException.class)
+    public ProblemDetail manejarSesionFinalizada(SesionFinalizadaException ex) {
+        return problema(HttpStatus.CONFLICT, "Sesión finalizada", ex.getMessage(), "sesion-finalizada");
+    }
+
+    /**
+     * Una restricción de la BD rechazó el cambio (p. ej. dos series registradas a la vez con el mismo número).
+     * No se expone el detalle SQL.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail manejarConflictoDeDatos(DataIntegrityViolationException ex) {
+        log.warn("Restricción de integridad violada: {}", ex.getMostSpecificCause().getMessage());
+        return problema(HttpStatus.CONFLICT, "Conflicto con los datos existentes",
+                "La operación entra en conflicto con otro cambio. Recarga los datos e intenta nuevamente.",
+                "conflicto");
     }
 
     @ExceptionHandler(EmailYaRegistradoException.class)
@@ -82,16 +101,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Ocurrió un error inesperado.", "error-interno");
     }
 
-    /** Errores de {@code @Min}, {@code @Max}, etc. en parámetros del controlador. */
+    /**
+     * Validación de método: {@code @Min}, {@code @Positive}, etc. en parámetros y, cuando el controlador tiene
+     * restricciones en parámetros, también el {@code @Valid @RequestBody} (sus errores vienen como
+     * {@link ParameterErrors} y se informan por campo del cuerpo, no por nombre del parámetro).
+     */
     @Override
     protected ResponseEntity<Object> handleHandlerMethodValidationException(
             HandlerMethodValidationException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        boolean errorEnCuerpo = ex.getParameterValidationResults().stream()
+                .anyMatch(ParameterErrors.class::isInstance);
         String detalle = ex.getParameterValidationResults().stream()
-                .flatMap(resultado -> resultado.getResolvableErrors().stream()
-                        .map(error -> resultado.getMethodParameter().getParameterName() + ": "
-                                + error.getDefaultMessage()))
+                .flatMap(resultado -> resultado instanceof ParameterErrors errores
+                        ? errores.getFieldErrors().stream().map(GlobalExceptionHandler::describir)
+                        : resultado.getResolvableErrors().stream()
+                                .map(error -> resultado.getMethodParameter().getParameterName() + ": "
+                                        + error.getDefaultMessage()))
+                .sorted()
                 .collect(Collectors.joining("; "));
-        ProblemDetail body = problema(HttpStatus.BAD_REQUEST, "Parámetros inválidos", detalle, "validacion");
+        ProblemDetail body = problema(HttpStatus.BAD_REQUEST,
+                errorEnCuerpo ? "Datos inválidos" : "Parámetros inválidos", detalle, "validacion");
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
     }
 
@@ -100,12 +129,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         String detalle = ex.getBindingResult().getFieldErrors().stream()
-                .sorted(Comparator.comparing(FieldError::getField)
-                        .thenComparing(error -> String.valueOf(error.getDefaultMessage())))
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(GlobalExceptionHandler::describir)
+                .sorted()
                 .collect(Collectors.joining("; "));
         ProblemDetail body = problema(HttpStatus.BAD_REQUEST, "Datos inválidos", detalle, "validacion");
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    private static String describir(FieldError error) {
+        return error.getField() + ": " + error.getDefaultMessage();
     }
 
     /** Agrega {@code timestamp} también a los errores que resuelve Spring (400, 404, 405...). */

@@ -1,7 +1,6 @@
 package com.maxtracker.api.config;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Clock;
 
 import javax.crypto.SecretKey;
 
@@ -13,7 +12,7 @@ import io.jsonwebtoken.security.Keys;
 
 /**
  * Beans de soporte para JWT: la clave de firma (validada al arrancar, así un {@code JWT_SECRET}
- * débil impide el despliegue en lugar de fallar en el primer login) y el reloj del sistema.
+ * débil impide el despliegue en lugar de fallar en el primer login). El reloj está en {@link ClockConfig}.
  */
 @Configuration
 @EnableConfigurationProperties({JwtProperties.class, AuthProperties.class})
@@ -30,10 +29,5 @@ public class JwtConfig {
                     + " bytes (tiene " + secreto.length + ")");
         }
         return Keys.hmacShaKeyFor(secreto);
-    }
-
-    @Bean
-    public Clock clock() {
-        return Clock.systemUTC();
     }
 }

@@ -105,13 +105,14 @@ rutina  1──* sesion_entrenamiento (opcional)
 | `Ejercicio` → `ejercicio` | `id`, `wger_id` BIGINT, `usuario_id`, `nombre` VARCHAR(150), `categoria` VARCHAR(50), `creado_en` | Ejercicio de wger **o** personalizado (ver §4.3). `wger_id` único; `(usuario_id, nombre)` único. FK `usuario_id` → `usuario` `ON DELETE CASCADE` |
 | `Rutina` → `rutina` | `id`, `usuario_id`, `nombre` VARCHAR(100), `descripcion` VARCHAR(500), `creado_en` | FK `usuario_id` → `usuario` `ON DELETE CASCADE`. Sus ítems se guardan y borran en cascada desde la entidad (`orphanRemoval`) |
 | `RutinaEjercicio` → `rutina_ejercicio` | `id`, `rutina_id`, `ejercicio_id`, `orden` SMALLINT, `series_objetivo`, `repeticiones_objetivo` | FK `rutina_id` → `rutina` `ON DELETE CASCADE`; FK `ejercicio_id` → `ejercicio` (restringe el borrado). `orden` > 0; objetivos > 0 si se informan |
-| `SesionEntrenamiento` → `sesion_entrenamiento` | `id`, `usuario_id`, `rutina_id` (opcional), `fecha` DATE, `notas` VARCHAR(1000), `creado_en` | FK `usuario_id` → `usuario` `ON DELETE CASCADE`; FK `rutina_id` → `rutina` `ON DELETE SET NULL` (borrar una rutina conserva el historial). Sus series se guardan y borran en cascada |
+| `SesionEntrenamiento` → `sesion_entrenamiento` | `id`, `usuario_id`, `rutina_id` (opcional), `fecha` DATE, `notas` VARCHAR(1000), `creado_en`, `iniciada_en`, `finalizada_en` (V2) | FK `usuario_id` → `usuario` `ON DELETE CASCADE`; FK `rutina_id` → `rutina` `ON DELETE SET NULL` (borrar una rutina conserva el historial). Sus series se guardan y borran en cascada. `finalizada_en` NULL = en curso; CHECK `finalizada_en >= iniciada_en` |
 | `SerieRegistro` → `serie_registro` | `id`, `sesion_id`, `ejercicio_id`, `numero_serie` SMALLINT, `peso_kg` NUMERIC(6,2), `repeticiones` SMALLINT, `rir` SMALLINT (opcional) | FK `sesion_id` → `sesion_entrenamiento` `ON DELETE CASCADE`; FK `ejercicio_id` → `ejercicio` (restringe el borrado). `(sesion_id, ejercicio_id, numero_serie)` único; `peso_kg` ≥ 0, `repeticiones` > 0, `rir` entre 0 y 10 |
 
 **Decisiones de diseño**
 
 * **Orden de los ejercicios de una rutina:** `rutina_ejercicio` **no** tiene `UNIQUE (rutina_id, orden)`. Al quitar o reordenar ejercicios, Hibernate actualiza las filas restantes antes de borrar la eliminada y esa restricción fallaría. El orden lo mantiene la entidad `Rutina` (`agregarEjercicio` numera al final y `quitarEjercicio` renumera 1..n) y se lee con `@OrderBy("orden ASC")`.
-* **Número de serie:** `SesionEntrenamiento.registrarSerie(...)` asigna `numero_serie` correlativo **por ejercicio** dentro de la sesión.
+* **Número de serie:** `SesionEntrenamiento.registrarSerie(...)` asigna `numero_serie` correlativo **por ejercicio** dentro de la sesión: el siguiente al **mayor** existente (no a la cantidad), así borrar una serie intermedia no repite un número y no viola el `UNIQUE` (quedan huecos: 1, 3, 4).
+* **Sesión en curso / finalizada:** se inicia al crearla (`iniciada_en`, reloj del servidor) y se cierra con `POST /finalizar`. Una sesión finalizada no admite agregar ni quitar series (409); fecha y notas sí se pueden editar.
 * **Índices:** las FK no se indexan solas en PostgreSQL, así que se crean `ix_rutina_usuario`, `ix_rutina_ejercicio_rutina_orden`, `ix_rutina_ejercicio_ejercicio`, `ix_sesion_usuario_fecha`, `ix_sesion_rutina`, `ix_serie_sesion` e `ix_serie_ejercicio` (este último para las consultas de progreso).
 
 **Repositorios** (`com.maxtracker.api.repository`)
@@ -119,8 +120,8 @@ rutina  1──* sesion_entrenamiento (opcional)
 | Repositorio | Consultas propias |
 |---|---|
 | `UsuarioRepository` | `buscarPorEmail`, `existeEmail` (normalizan el email antes de consultar) |
-| `EjercicioRepository` | `findByWgerId` (copia local de wger), `findByUsuarioIdOrderByNombreAsc` (personalizados del usuario) |
-| `RutinaRepository` | `findByUsuarioIdOrderByNombreAsc`; `findConEjerciciosByIdAndUsuarioId` (con `@EntityGraph`: rutina + ejercicios en una consulta) |
+| `EjercicioRepository` | `findByWgerId` (copia local de wger), `findByUsuarioIdOrderByNombreAsc` (personalizados del usuario), `findAccesible(id, usuarioId)` (copia de wger o personalizado propio) |
+| `RutinaRepository` | `findByUsuarioIdOrderByNombreAsc`; `findByIdAndUsuarioId`; `findConEjerciciosByIdAndUsuarioId` (con `@EntityGraph`: rutina + ejercicios en una consulta) |
 | `SesionEntrenamientoRepository` | `findByUsuarioIdOrderByFechaDescIdDesc` (historial paginado); `findConSeriesByIdAndUsuarioId` (con `@EntityGraph`) |
 | `SerieRegistroRepository` | `findHistorial(usuarioId, ejercicioId)`: series de un ejercicio en orden cronológico, base de las métricas del Día 7 |
 
@@ -139,11 +140,13 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 * La copia local guarda `nombre` y `categoria`, de modo que el historial y las rutinas se pueden mostrar aunque wger esté caído o cambie sus datos.
 * Las copias de wger son compartidas por todos los usuarios (sin dueño); los personalizados pertenecen a un usuario y se borran con él. Un mismo usuario no puede repetir el nombre de un personalizado.
 * Un ejercicio que ya está en una rutina o en una serie no se puede borrar (FK sin cascada), para no perder historial.
+* **Creación de la copia (Día 3):** al registrar una serie con `wgerId`, `ResolutorEjercicio` busca la copia local; si no existe, consulta wger y la guarda en una transacción propia (`REQUIRES_NEW`). Si dos peticiones la crean a la vez, la que pierde en el `UNIQUE (wger_id)` relee la copia ganadora sin invalidar su transacción. Con `ejercicioId` se acepta una copia de wger o un personalizado **propio**; el de otro usuario responde 404.
 
 ### 4.4 Migraciones con Flyway
 
 * El esquema se versiona como scripts SQL en `/maxtracker-backend/src/main/resources/db/migration/`. Flyway los aplica al arrancar y registra lo aplicado en la tabla `flyway_schema_history`.
 * **`V1__esquema_inicial.sql`** crea las seis tablas, sus FK, restricciones `UNIQUE`/`CHECK` e índices. El SQL es compatible con PostgreSQL y con H2 en modo PostgreSQL.
+* **`V2__estado_sesion.sql`** agrega `iniciada_en` (las filas existentes toman su `creado_en`) y `finalizada_en` a `sesion_entrenamiento`, con el CHECK `ck_sesion_finalizada`.
 * Hibernate usa `ddl-auto=validate`: nunca crea ni modifica tablas, solo verifica al arrancar que las entidades coinciden con el esquema.
 * **Regla:** una migración ya aplicada en Supabase no se edita; cualquier cambio va en un script nuevo (`V2__...sql`, `V3__...sql`).
 * Dependencias: `flyway-core` y `flyway-database-postgresql`.
@@ -159,7 +162,7 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | `hibernate.jdbc.time_zone` | `UTC` |
 | `spring.config.import` | Lee un `.env` local opcional (raíz del monorepo o carpeta del backend) |
 
-**Perfil `test`** (`src/test/resources/application-test.properties`): H2 en memoria con `MODE=PostgreSQL`. Flyway aplica la misma `V1` y Hibernate la valida, así los tests no necesitan Supabase ni internet.
+**Perfil `test`** (`src/test/resources/application-test.properties`): H2 en memoria con `MODE=PostgreSQL`. Flyway aplica las mismas migraciones y Hibernate la valida, así los tests no necesitan Supabase ni internet.
 
 ## 5. Contrato de la API (v1)
 
@@ -169,9 +172,12 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | GET | `/api/v1/ejercicios/{id}` | 1 | Detalle de un ejercicio |
 | POST | `/api/v1/auth/register` | 3 | Crea la cuenta y devuelve un JWT (201; 409 si el email existe; 403 si el registro está deshabilitado) |
 | POST | `/api/v1/auth/login` | 3 | Obtiene JWT (401 si las credenciales no son válidas) |
-| GET/POST | `/api/v1/sesiones` | 3 | Listar / crear sesiones |
-| GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle / editar / eliminar |
-| POST | `/api/v1/sesiones/{id}/series` | 3 | Agregar serie a una sesión |
+| GET | `/api/v1/sesiones` | 3 | Historial paginado del usuario (`pagina`, `tamanio` 1–100), sin series |
+| POST | `/api/v1/sesiones` | 3 | Inicia una sesión (`fecha` opcional, por defecto hoy en `APP_ZONA_HORARIA`; `rutinaId`, `notas`). 201 + `Location` |
+| GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle con series / editar fecha y notas / eliminar (204) |
+| POST | `/api/v1/sesiones/{id}/finalizar` | 3 | Finaliza la sesión (409 si ya lo estaba) |
+| POST | `/api/v1/sesiones/{id}/series` | 3 | Registra una serie: `wgerId` **o** `ejercicioId`, `pesoKg` (0–9999,99), `repeticiones` (1–999), `rir` (0–10, opcional). 201; 409 si la sesión está finalizada |
+| DELETE | `/api/v1/sesiones/{id}/series/{serieId}` | 3 | Quita una serie (204; 409 si la sesión está finalizada) |
 | GET | `/api/v1/progreso/{ejercicioId}` | 7 | Serie temporal: peso máx., volumen, 1RM estimado |
 | POST | `/api/v1/analisis` | 7 | Análisis IA del progreso |
 | GET | `/actuator/health` | 1 | Health check (Render) |
