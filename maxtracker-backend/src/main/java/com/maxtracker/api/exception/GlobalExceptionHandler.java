@@ -2,6 +2,7 @@ package com.maxtracker.api.exception;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,6 +12,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -37,6 +43,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problema(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage(), "no-encontrado");
     }
 
+    @ExceptionHandler(EmailYaRegistradoException.class)
+    public ProblemDetail manejarEmailYaRegistrado(EmailYaRegistradoException ex) {
+        return problema(HttpStatus.CONFLICT, "Email ya registrado", ex.getMessage(), "email-ya-registrado");
+    }
+
+    @ExceptionHandler(RegistroDeshabilitadoException.class)
+    public ProblemDetail manejarRegistroDeshabilitado(RegistroDeshabilitadoException ex) {
+        return problema(HttpStatus.FORBIDDEN, "Registro deshabilitado", ex.getMessage(), "registro-deshabilitado");
+    }
+
+    /**
+     * Credenciales incorrectas en el login, o petición sin un JWT válido (vía {@code SecurityProblemHandler}).
+     * No distingue "usuario inexistente" de "contraseña incorrecta" para no revelar qué emails existen.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> manejarNoAutenticado(AuthenticationException ex) {
+        ProblemDetail body = ex instanceof BadCredentialsException
+                ? problema(HttpStatus.UNAUTHORIZED, "Credenciales inválidas",
+                        "Email o contraseña incorrectos.", "credenciales-invalidas")
+                : problema(HttpStatus.UNAUTHORIZED, "No autenticado",
+                        "Se requiere un token JWT válido en la cabecera Authorization.", "no-autenticado");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .body(body);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ProblemDetail manejarAccesoDenegado(AccessDeniedException ex) {
+        return problema(HttpStatus.FORBIDDEN, "Acceso denegado",
+                "No tienes permiso para acceder a este recurso.", "acceso-denegado");
+    }
+
     @ExceptionHandler(Exception.class)
     public ProblemDetail manejarInesperado(Exception ex) {
         log.error("Error no controlado", ex);
@@ -54,6 +92,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                 + error.getDefaultMessage()))
                 .collect(Collectors.joining("; "));
         ProblemDetail body = problema(HttpStatus.BAD_REQUEST, "Parámetros inválidos", detalle, "validacion");
+        return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    /** Errores de Bean Validation en un {@code @Valid @RequestBody}: "campo: mensaje", ordenados por campo. */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String detalle = ex.getBindingResult().getFieldErrors().stream()
+                .sorted(Comparator.comparing(FieldError::getField)
+                        .thenComparing(error -> String.valueOf(error.getDefaultMessage())))
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        ProblemDetail body = problema(HttpStatus.BAD_REQUEST, "Datos inválidos", detalle, "validacion");
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
     }
 

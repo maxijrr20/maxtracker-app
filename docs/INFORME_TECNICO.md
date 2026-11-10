@@ -57,10 +57,12 @@ maxtracker-app/
 | `com.maxtracker.api.controller` | `@RestController` — solo HTTP: parámetros, validación y `ResponseEntity` |
 | `com.maxtracker.api.dto` | DTOs de request/response (records) con `jakarta.validation` |
 | `com.maxtracker.api.dto.wger` | DTOs que reflejan el JSON externo de wger (aislados del resto) |
+| `com.maxtracker.api.dto.auth` | `RegisterRequest`, `LoginRequest`, `AuthResponse` |
 | `com.maxtracker.api.exception` | Excepciones de dominio + `GlobalExceptionHandler` (RFC 9457 `ProblemDetail`) |
 | `com.maxtracker.api.mapper` | Conversión Entidad ↔ DTO y wger ↔ DTO |
 | `com.maxtracker.api.model` | Entidades JPA (heredan de `EntidadBase`: `id` autogenerado y `equals`/`hashCode` seguros con proxies) |
 | `com.maxtracker.api.repository` | Interfaces `JpaRepository` |
+| `com.maxtracker.api.security` | `JwtService`, `JwtAuthenticationFilter`, `UsuarioDetailsService`, principal `UsuarioAutenticado` y `SecurityProblemHandler` (401/403 como `ProblemDetail`) |
 | `src/main/resources/db/migration` | Scripts SQL versionados de Flyway (`V1__esquema_inicial.sql`, …) |
 | `com.maxtracker.api.service` | Interfaces de negocio; implementaciones en `service.impl` |
 
@@ -165,7 +167,8 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 |---|---|---|---|
 | GET | `/api/v1/ejercicios` | 1 | Catálogo paginado (`pagina`, `tamanio` 1–100, `categoria`) |
 | GET | `/api/v1/ejercicios/{id}` | 1 | Detalle de un ejercicio |
-| POST | `/api/v1/auth/login` | 3 | Obtiene JWT |
+| POST | `/api/v1/auth/register` | 3 | Crea la cuenta y devuelve un JWT (201; 409 si el email existe; 403 si el registro está deshabilitado) |
+| POST | `/api/v1/auth/login` | 3 | Obtiene JWT (401 si las credenciales no son válidas) |
 | GET/POST | `/api/v1/sesiones` | 3 | Listar / crear sesiones |
 | GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle / editar / eliminar |
 | POST | `/api/v1/sesiones/{id}/series` | 3 | Agregar serie a una sesión |
@@ -177,7 +180,10 @@ Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `ti
 
 ## 6. Seguridad
 
-* **Autenticación obligatoria:** aunque la app sea de uso personal, la API es pública en internet. Sin autenticación cualquiera podría leer o borrar los registros. Se implementa Spring Security con JWT (usuario único sembrado por variable de entorno, contraseña con BCrypt).
+* **Autenticación obligatoria:** aunque la app sea de uso personal, la API es pública en internet. Sin autenticación cualquiera podría leer o borrar los registros. Spring Security 6 en modo *stateless* (sin sesión ni cookies, CSRF desactivado) con JWT HS256 (jjwt). Solo son públicos `POST /api/v1/auth/register`, `POST /api/v1/auth/login` y `GET /actuator/health`; el resto exige `Authorization: Bearer <token>`.
+* **Contraseñas:** BCrypt (8–72 caracteres). El login no distingue "email inexistente" de "contraseña incorrecta" (mismo 401) para no revelar qué cuentas existen.
+* **JWT:** `sub` = email, `iss` = `maxtracker-api`, vigencia `JWT_EXPIRATION` (12 h por defecto). `JWT_SECRET` es obligatorio y debe tener al menos 32 bytes: la app no arranca con un secreto débil. Cada petición recarga el usuario, así un token de una cuenta borrada deja de servir.
+* **Registro:** `AUTH_REGISTRO_HABILITADO` (por defecto `true`). Como la app es de uso personal, en producción se crea la cuenta y luego se pone en `false` (el endpoint responde 403).
 * **Secretos:** solo en variables de entorno; `.env` está en `.gitignore` y se versiona `.env.example`.
 * **CORS:** restringido a los orígenes del frontend (`CORS_ALLOWED_ORIGINS`).
 * **Actuator:** solo se expone `/actuator/health`, sin detalles.

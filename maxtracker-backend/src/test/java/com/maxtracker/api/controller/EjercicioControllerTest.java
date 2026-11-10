@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,9 +24,12 @@ import com.maxtracker.api.dto.EjercicioDto;
 import com.maxtracker.api.dto.PaginaDto;
 import com.maxtracker.api.exception.EjercicioNoEncontradoException;
 import com.maxtracker.api.exception.WgerApiException;
+import com.maxtracker.api.security.ConSeguridadJwt;
 import com.maxtracker.api.service.EjercicioService;
 
 @WebMvcTest(EjercicioController.class)
+@ConSeguridadJwt
+@WithMockUser
 class EjercicioControllerTest {
 
     private static final EjercicioDto PRESS_BANCA = new EjercicioDto(192, "Press de banca", "Empuja la barra", "es",
