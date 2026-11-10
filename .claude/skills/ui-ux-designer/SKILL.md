@@ -71,18 +71,25 @@ Al crear un componente:
 | atom | `Spinner` | Carga con texto (`role="status"`) |
 | atom | `Card` | Superficie base |
 | atom | `Titulo`, `Texto` | Tipografía semántica (h1–h3, p) |
+| atom | `Chip` | Filtro alternable de 48 px (`aria-pressed`), p. ej. grupo muscular |
 | molecule | `FormField` | Label visible + Input + ayuda/error con `aria-describedby` |
 | molecule | `Alert` | Error (`role="alert"`) o info (`role="status"`) |
 | molecule | `EmptyState` | Lista vacía: ícono + título + descripción + acción |
 | molecule | `NavItem` | Ítem de navegación (ícono + texto, `aria-current`) |
 | molecule | `SerieRow` | Serie registrada: n.º, peso × reps, RIR, borrar |
 | molecule | `EjercicioCard` | Ejercicio con objetivo y avance; `children` para series/formulario |
+| molecule | `Sheet` | Modal sobre `<dialog>`: hoja inferior en móvil, diálogo centrado desde `md`; Esc y toque fuera cierran |
+| molecule | `ContadorField` | Número con − / + de 48 px (series, reps objetivo); bajar del mínimo lo deja vacío |
+| molecule | `EjercicioOpcion` | Fila de resultado del buscador (imagen, nombre, grupo/músculos) |
 | organism | `AuthForm` | Login / registro con validación igual al backend |
 | organism | `BottomNav` | Barra inferior en móvil, lateral desde `md` |
 | organism | `RutinaEjercicioList` | Ejercicios de una rutina en orden |
 | organism | `RegistrarSerieForm` | Peso / reps / RIR + registrar |
 | organism | `DescansoTimer` | Cronómetro de descanso con presets, vibración al terminar |
 | organism | `SesionActivaCard` | Resumen de la sesión: tiempo, series, volumen + acción |
+| organism | `EjercicioSelector` | Buscador en `Sheet`: chips de grupo muscular + texto; "Tus ejercicios" y catálogo. Recibe `buscarCatalogo` por props |
+| organism | `RutinaForm` | Crear/editar rutina: nombre, descripción, ejercicios con `ContadorField`, reordenar y quitar |
+| organism | `ActualizacionAviso` | Avisos del service worker (versión nueva / lista sin conexión) |
 | template | `MainLayout` | Cabecera + contenido + `BottomNav` (padding para safe-area) |
 | template | `AuthLayout` | Columna centrada para /login y /register |
 
@@ -94,6 +101,8 @@ Al crear un componente:
 - **Cronómetros y números grandes:** `text-6xl font-bold tabular-nums`, calculados contra una hora de fin (no sumando ticks).
 - **Estados obligatorios en toda pantalla con datos:** cargando (`Spinner`), error (`Alert` + botón "Reintentar"), vacío (`EmptyState` con la siguiente acción) y contenido.
 - **Tarjetas navegables:** toda la tarjeta es el enlace (`min-h-16`), con `ChevronRight` como pista.
+- **Modales:** siempre `Sheet` (nunca un `div` posicionado a mano). Un `Sheet` que contiene su propio buscador o formulario se renderiza **fuera** de cualquier `<form>` padre, para que Enter no envíe el formulario de atrás.
+- **Ajustes numéricos sin teclado** (objetivos, cantidades acotadas): `ContadorField`. Para valores medidos (peso real levantado) usa `FormField` con `inputMode`.
 - **Iconos:** `lucide-react`, `size-5` en botones, `size-6` en navegación e `IconButton`, siempre `aria-hidden` si hay texto al lado.
 
 ## 6. Accesibilidad (no negociable)

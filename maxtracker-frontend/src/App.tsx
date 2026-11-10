@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { AuthProvider } from './auth/AuthProvider'
 import { RequiereAuth, SoloInvitados } from './auth/guards'
+import { ActualizacionAviso } from './components/organisms/ActualizacionAviso'
 import { AuthLayout } from './components/templates/AuthLayout'
 import { MainLayout } from './components/templates/MainLayout'
 import { DashboardPage } from './pages/DashboardPage'
@@ -10,6 +11,7 @@ import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { RutinaDetallePage } from './pages/RutinaDetallePage'
+import { RutinaFormPage } from './pages/RutinaFormPage'
 import { RutinasPage } from './pages/RutinasPage'
 
 const router = createBrowserRouter([
@@ -35,7 +37,9 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <DashboardPage /> },
           { path: '/rutinas', element: <RutinasPage /> },
+          { path: '/rutinas/nueva', element: <RutinaFormPage /> },
           { path: '/rutinas/:id', element: <RutinaDetallePage /> },
+          { path: '/rutinas/:id/editar', element: <RutinaFormPage /> },
           { path: '/entrenamiento', element: <EntrenamientoPage /> },
         ],
       },
@@ -48,6 +52,7 @@ export default function App() {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <ActualizacionAviso />
     </AuthProvider>
   )
 }

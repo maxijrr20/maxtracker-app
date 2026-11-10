@@ -1,9 +1,10 @@
-import { ChevronRight, ListChecks, RotateCw } from 'lucide-react'
+import { ChevronRight, ListChecks, Plus, RotateCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { listarRutinas } from '../api/rutinas'
 import { Badge } from '../components/atoms/Badge'
 import { Button } from '../components/atoms/Button'
+import { ButtonLink } from '../components/atoms/ButtonLink'
 import { Spinner } from '../components/atoms/Spinner'
 import { Texto, Titulo } from '../components/atoms/Typography'
 import { Alert } from '../components/molecules/Alert'
@@ -15,9 +16,17 @@ export function RutinasPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-1">
-        <Titulo>Rutinas</Titulo>
-        <Texto suave>Elige una rutina para ver sus ejercicios y empezar a entrenar.</Texto>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <Titulo>Rutinas</Titulo>
+          <Texto suave>Elige una rutina para ver sus ejercicios y empezar a entrenar.</Texto>
+        </div>
+        {/* Solo hay botón arriba si ya hay rutinas: con la lista vacía la acción está en el EmptyState. */}
+        {rutinas && rutinas.length > 0 && (
+          <ButtonLink to="/rutinas/nueva" icono={Plus} className="shrink-0">
+            Nueva rutina
+          </ButtonLink>
+        )}
       </div>
 
       {cargando && <Spinner etiqueta="Cargando rutinas…" />}
@@ -35,7 +44,12 @@ export function RutinasPage() {
         <EmptyState
           icono={ListChecks}
           titulo="Todavía no tienes rutinas"
-          descripcion="Pronto podrás crearlas desde aquí con el buscador de ejercicios."
+          descripcion="Crea tu primera rutina con los ejercicios del catálogo y tus series objetivo."
+          accion={
+            <ButtonLink to="/rutinas/nueva" tamano="lg" icono={Plus}>
+              Nueva rutina
+            </ButtonLink>
+          }
         />
       )}
 

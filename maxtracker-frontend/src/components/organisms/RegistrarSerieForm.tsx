@@ -2,13 +2,14 @@ import { Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
 import { ApiError } from '../../api/http'
-import type { RegistrarSerieRequest } from '../../api/types'
+import type { RefEjercicio, RegistrarSerieRequest } from '../../api/types'
 import { Button } from '../atoms/Button'
 import { Alert } from '../molecules/Alert'
 import { FormField } from '../molecules/FormField'
 
 export interface RegistrarSerieFormProps {
-  ejercicioId: number
+  /** Ejercicio local o de wger (la primera serie de un ejercicio de wger crea su copia local). */
+  ejercicio: RefEjercicio
   /** Valores sugeridos (la última serie del ejercicio o el objetivo de la rutina). */
   pesoInicial?: number
   repeticionesIniciales?: number
@@ -21,7 +22,7 @@ function aNumero(texto: string): number {
 }
 
 /** Peso / repeticiones / RIR con las mismas reglas que RegistrarSerieRequest del backend. */
-export function RegistrarSerieForm({ ejercicioId, pesoInicial, repeticionesIniciales, onRegistrar }: RegistrarSerieFormProps) {
+export function RegistrarSerieForm({ ejercicio, pesoInicial, repeticionesIniciales, onRegistrar }: RegistrarSerieFormProps) {
   const [peso, setPeso] = useState(pesoInicial?.toString() ?? '')
   const [reps, setReps] = useState(repeticionesIniciales?.toString() ?? '')
   const [rir, setRir] = useState('')
@@ -47,7 +48,7 @@ export function RegistrarSerieForm({ ejercicioId, pesoInicial, repeticionesInici
     setError(null)
     setEnviando(true)
     try {
-      await onRegistrar({ ejercicioId, pesoKg: Math.round(pesoKg * 100) / 100, repeticiones, rir: valorRir })
+      await onRegistrar({ ...ejercicio, pesoKg: Math.round(pesoKg * 100) / 100, repeticiones, rir: valorRir })
       setRir('')
     } catch (causa) {
       setError(causa instanceof ApiError ? causa.message : 'No se pudo registrar la serie.')

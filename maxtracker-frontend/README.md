@@ -17,17 +17,43 @@ La API se configura con `VITE_API_URL` (por defecto `http://localhost:8080/api/v
 
 ```
 src/
-  api/          Cliente HTTP (axios) y funciones por recurso: auth, rutinas, sesiones
+  api/          Cliente HTTP (axios) y funciones por recurso: auth, ejercicios, rutinas, sesiones
   auth/         AuthProvider, useAuth y guards de ruta (RequiereAuth, SoloInvitados)
   hooks/        useCarga: carga de datos con cancelación y reintento
-  lib/          tokenStorage (JWT en localStorage), cx
+  lib/          tokenStorage (JWT), categorias (grupos musculares de wger), ejerciciosPendientes, cx
   components/
-    atoms/      Button, ButtonLink, IconButton, Input, Badge, Spinner, Card, Titulo/Texto
-    molecules/  FormField, Alert, EmptyState, NavItem, SerieRow, EjercicioCard
-    organisms/  AuthForm, BottomNav, RutinaEjercicioList, RegistrarSerieForm, DescansoTimer, SesionActivaCard
+    atoms/      Button, ButtonLink, IconButton, Input, Chip, Badge, Spinner, Card, Titulo/Texto
+    molecules/  FormField, Alert, EmptyState, NavItem, SerieRow, EjercicioCard, Sheet, ContadorField, EjercicioOpcion
+    organisms/  AuthForm, BottomNav, RutinaEjercicioList, RegistrarSerieForm, DescansoTimer, SesionActivaCard,
+                EjercicioSelector, RutinaForm, ActualizacionAviso
     templates/  MainLayout (con Bottom Navigation), AuthLayout
-  pages/        Login, Register, Dashboard, Rutinas, RutinaDetalle, Entrenamiento, NotFound
+  pages/        Login, Register, Dashboard, Rutinas, RutinaDetalle, RutinaForm, Entrenamiento, NotFound
 ```
+
+## PWA
+
+- `vite-plugin-pwa` genera `manifest.webmanifest` y el service worker (`sw.js`, Workbox) en `npm run build`.
+  El service worker no se activa en `npm run dev`: para probar la instalación usa `npm run build && npm run preview`.
+- El service worker precachea la app (abre sin conexión). Las llamadas a la API **no** se cachean.
+- Actualizaciones con `registerType: 'prompt'`: aparece un aviso "Actualizar" y la app nunca se recarga sola en medio de
+  un entrenamiento.
+- Íconos en `public/` generados desde `public/logo.svg` con `npm run generate-pwa-assets` (se versionan).
+
+## Buscador de ejercicios
+
+El backend (`GET /ejercicios`) pagina y filtra por categoría de wger, pero **no busca por texto**. Por eso
+`EjercicioSelector` filtra por nombre o músculo en el cliente, sobre lo cargado:
+
+- Con un grupo muscular elegido y texto escrito, carga la categoría completa (≤ 230 ejercicios, 3 páginas).
+- En "Todos" carga de a 100 con "Buscar en más ejercicios".
+- "Tus ejercicios" (los de tus rutinas) aparece primero y se envía como `ejercicioId`; los del catálogo se envían
+  como `wgerId` y el backend crea la copia local la primera vez.
+
+## Entrenamiento libre
+
+`/entrenamiento` sin sesión en curso permite empezar sin rutina y agregar ejercicios con el buscador. El backend solo
+guarda series, así que los ejercicios agregados que aún no tienen series se recuerdan en `localStorage` por sesión
+(`maxtracker.sesion.<id>.pendientes`) hasta registrar su primera serie o finalizar.
 
 El sistema de diseño está documentado en la skill `.claude/skills/ui-ux-designer/SKILL.md`.
 
@@ -45,5 +71,6 @@ El sistema de diseño está documentado en la skill `.claude/skills/ui-ux-design
 |---|---|---|
 | `/login`, `/register` | Invitados | Formularios de acceso |
 | `/` | Autenticado | Inicio: sesión en curso o acceso a rutinas, últimas sesiones |
-| `/rutinas`, `/rutinas/:id` | Autenticado | Lista y detalle de rutinas; "Empezar entrenamiento" |
-| `/entrenamiento` | Autenticado | Sesión en curso: registrar series, cronómetro de descanso, finalizar |
+| `/rutinas`, `/rutinas/:id` | Autenticado | Lista ("+ Nueva rutina") y detalle (editar, eliminar, "Empezar entrenamiento") |
+| `/rutinas/nueva`, `/rutinas/:id/editar` | Autenticado | Crear / editar rutina con el buscador de ejercicios |
+| `/entrenamiento` | Autenticado | Sesión en curso o entrenamiento libre: agregar ejercicios, registrar series, descanso, finalizar |

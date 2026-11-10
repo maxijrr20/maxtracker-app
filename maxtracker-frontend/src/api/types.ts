@@ -87,9 +87,48 @@ export interface Sesion extends SesionResumen {
   series: Serie[]
 }
 
-export interface RegistrarSerieRequest {
-  ejercicioId: number
+/** Exactamente uno de {@code ejercicioId} (local) o {@code wgerId} (catálogo). */
+export type RefEjercicio = { ejercicioId: number; wgerId?: undefined } | { wgerId: number; ejercicioId?: undefined }
+
+export type RegistrarSerieRequest = RefEjercicio & {
   pesoKg: number
   repeticiones: number
   rir?: number | null
+}
+
+// --- Rutinas: escritura ---
+
+export type RutinaEjercicioRequest = RefEjercicio & {
+  seriesObjetivo: number | null
+  repeticionesObjetivo: number | null
+}
+
+export interface GuardarRutinaRequest {
+  nombre: string
+  descripcion: string | null
+  ejercicios: RutinaEjercicioRequest[]
+}
+
+/** Ejercicio que el usuario ya usó (copia local de wger o personalizado), identificado por su ID local. */
+export interface EjercicioLocal {
+  ejercicioId: number
+  wgerId: number | null
+  nombre: string
+  categoria: string | null
+}
+
+// --- Catálogo (wger vía backend) ---
+
+export interface EjercicioCatalogo {
+  /** ID en wger (se envía como {@code wgerId}). */
+  id: number
+  nombre: string
+  descripcion: string | null
+  idioma: string | null
+  categoriaId: number | null
+  categoria: string | null
+  musculosPrincipales: string[]
+  musculosSecundarios: string[]
+  equipamiento: string[]
+  imagenUrl: string | null
 }

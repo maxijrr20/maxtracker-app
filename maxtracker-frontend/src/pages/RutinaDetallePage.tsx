@@ -1,9 +1,9 @@
-import { ArrowLeft, Play, RotateCw } from 'lucide-react'
+import { ArrowLeft, Pencil, Play, RotateCw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { ApiError } from '../api/http'
-import { obtenerRutina } from '../api/rutinas'
+import { eliminarRutina, obtenerRutina } from '../api/rutinas'
 import { iniciarSesion } from '../api/sesiones'
 import { Button } from '../components/atoms/Button'
 import { ButtonLink } from '../components/atoms/ButtonLink'
@@ -19,6 +19,24 @@ export function RutinaDetallePage() {
   const { datos: rutina, cargando, error, recargar } = useCarga((signal) => obtenerRutina(id, signal), [id])
   const [iniciando, setIniciando] = useState(false)
   const [errorInicio, setErrorInicio] = useState<string | null>(null)
+
+  const [confirmandoBorrado, setConfirmandoBorrado] = useState(false)
+  const [borrando, setBorrando] = useState(false)
+
+  async function eliminar() {
+    // Dos toques: borrar no se puede deshacer (las sesiones pasadas se conservan, sin rutina).
+    if (!confirmandoBorrado) return setConfirmandoBorrado(true)
+    setBorrando(true)
+    setErrorInicio(null)
+    try {
+      await eliminarRutina(id)
+      navegar('/rutinas', { replace: true })
+    } catch (causa) {
+      setErrorInicio(causa instanceof ApiError ? causa.message : 'No se pudo eliminar la rutina.')
+      setBorrando(false)
+      setConfirmandoBorrado(false)
+    }
+  }
 
   async function empezar() {
     setIniciando(true)
@@ -54,6 +72,22 @@ export function RutinaDetallePage() {
           <div className="flex flex-col gap-1">
             <Titulo className="break-words">{rutina.nombre}</Titulo>
             {rutina.descripcion && <Texto suave>{rutina.descripcion}</Texto>}
+          </div>
+
+          {/* Editar y eliminar arriba, lejos de la acción principal (abajo). */}
+          <div className="grid grid-cols-2 gap-2">
+            <ButtonLink to={`/rutinas/${id}/editar`} variante="secundario" icono={Pencil}>
+              Editar
+            </ButtonLink>
+            <Button
+              variante="peligro"
+              icono={Trash2}
+              cargando={borrando}
+              onClick={eliminar}
+              onBlur={() => setConfirmandoBorrado(false)}
+            >
+              {confirmandoBorrado ? '¿Eliminar? Toca otra vez' : 'Eliminar'}
+            </Button>
           </div>
 
           <RutinaEjercicioList ejercicios={rutina.ejercicios} />

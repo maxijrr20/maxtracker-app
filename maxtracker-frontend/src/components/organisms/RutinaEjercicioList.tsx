@@ -11,7 +11,7 @@ export function RutinaEjercicioList({ ejercicios }: { ejercicios: RutinaEjercici
       <EmptyState
         icono={ListPlus}
         titulo="Rutina sin ejercicios"
-        descripcion="Agrega ejercicios para usarla como plan de tus sesiones."
+        descripcion="Edítala para agregar ejercicios y usarla como plan de tus sesiones."
       />
     )
   }
