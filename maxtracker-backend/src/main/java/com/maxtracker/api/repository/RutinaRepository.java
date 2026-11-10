@@ -13,6 +13,10 @@ public interface RutinaRepository extends JpaRepository<Rutina, Long> {
 
     List<Rutina> findByUsuarioIdOrderByNombreAsc(Long usuarioId);
 
+    /** Rutinas de un usuario con sus ítems cargados (para contarlos sin una consulta por rutina). */
+    @EntityGraph(attributePaths = "ejercicios")
+    List<Rutina> findConEjerciciosByUsuarioIdOrderByNombreAscIdAsc(Long usuarioId);
+
     /** Rutina de un usuario (sin cargar sus ejercicios). */
     Optional<Rutina> findByIdAndUsuarioId(Long id, Long usuarioId);
 

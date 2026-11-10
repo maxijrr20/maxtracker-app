@@ -67,6 +67,11 @@ public class Rutina extends EntidadBase {
         }
     }
 
+    /** Quita todos los ejercicios (con {@code orphanRemoval} se borran sus filas al hacer flush). */
+    public void quitarTodosLosEjercicios() {
+        ejercicios.clear();
+    }
+
     public Usuario getUsuario() {
         return usuario;
     }

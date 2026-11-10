@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ import com.maxtracker.api.dto.sesion.SesionResumenDto;
 import com.maxtracker.api.exception.RecursoNoEncontradoException;
 import com.maxtracker.api.mapper.SesionMapper;
 import com.maxtracker.api.model.Ejercicio;
+import com.maxtracker.api.model.Rutina;
+import com.maxtracker.api.model.RutinaEjercicio;
 import com.maxtracker.api.model.SerieRegistro;
 import com.maxtracker.api.model.SesionEntrenamiento;
 import com.maxtracker.api.repository.RutinaRepository;
@@ -50,11 +53,15 @@ public class JpaSesionService implements SesionService {
         SesionEntrenamiento sesion =
                 new SesionEntrenamiento(usuarioRepository.getReferenceById(usuarioId), fecha, clock.instant());
         sesion.setNotas(request.notas());
+        List<RutinaEjercicio> plan = List.of();
         if (request.rutinaId() != null) {
-            sesion.setRutina(rutinaRepository.findByIdAndUsuarioId(request.rutinaId(), usuarioId)
-                    .orElseThrow(() -> RecursoNoEncontradoException.rutina(request.rutinaId())));
+            // Con sus ejercicios: la respuesta los incluye para precargar la sesión.
+            Rutina rutina = rutinaRepository.findConEjerciciosByIdAndUsuarioId(request.rutinaId(), usuarioId)
+                    .orElseThrow(() -> RecursoNoEncontradoException.rutina(request.rutinaId()));
+            sesion.setRutina(rutina);
+            plan = rutina.getEjercicios();
         }
-        return mapper.aDto(sesionRepository.saveAndFlush(sesion));
+        return mapper.aDto(sesionRepository.saveAndFlush(sesion), plan);
     }
 
     @Override
@@ -65,7 +72,7 @@ public class JpaSesionService implements SesionService {
 
     @Override
     public SesionDto obtener(long usuarioId, long sesionId) {
-        return mapper.aDto(buscar(usuarioId, sesionId));
+        return aDto(buscar(usuarioId, sesionId), usuarioId);
     }
 
     @Override
@@ -74,7 +81,7 @@ public class JpaSesionService implements SesionService {
         SesionEntrenamiento sesion = buscar(usuarioId, sesionId);
         sesion.setFecha(request.fecha());
         sesion.setNotas(request.notas());
-        return mapper.aDto(sesion);
+        return aDto(sesion, usuarioId);
     }
 
     @Override
@@ -88,7 +95,7 @@ public class JpaSesionService implements SesionService {
     public SesionDto finalizar(long usuarioId, long sesionId) {
         SesionEntrenamiento sesion = buscar(usuarioId, sesionId);
         sesion.finalizar(clock.instant());
-        return mapper.aDto(sesion);
+        return aDto(sesion, usuarioId);
     }
 
     @Override
@@ -115,6 +122,19 @@ public class JpaSesionService implements SesionService {
         SerieRegistro serie = sesion.buscarSerie(serieId)
                 .orElseThrow(() -> RecursoNoEncontradoException.serie(serieId));
         sesion.quitarSerie(serie);
+    }
+
+    /**
+     * La consulta de la sesión ya trae sus series; los ejercicios de la rutina se cargan en una consulta aparte
+     * (traer ambas colecciones en la misma consulta multiplicaría las filas).
+     */
+    private SesionDto aDto(SesionEntrenamiento sesion, long usuarioId) {
+        Rutina rutina = sesion.getRutina();
+        List<RutinaEjercicio> plan = rutina == null ? List.of()
+                : rutinaRepository.findConEjerciciosByIdAndUsuarioId(rutina.getId(), usuarioId)
+                        .map(Rutina::getEjercicios)
+                        .orElse(List.of());
+        return mapper.aDto(sesion, plan);
     }
 
     private SesionEntrenamiento buscar(long usuarioId, long sesionId) {

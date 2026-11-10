@@ -113,6 +113,8 @@ rutina  1──* sesion_entrenamiento (opcional)
 * **Orden de los ejercicios de una rutina:** `rutina_ejercicio` **no** tiene `UNIQUE (rutina_id, orden)`. Al quitar o reordenar ejercicios, Hibernate actualiza las filas restantes antes de borrar la eliminada y esa restricción fallaría. El orden lo mantiene la entidad `Rutina` (`agregarEjercicio` numera al final y `quitarEjercicio` renumera 1..n) y se lee con `@OrderBy("orden ASC")`.
 * **Número de serie:** `SesionEntrenamiento.registrarSerie(...)` asigna `numero_serie` correlativo **por ejercicio** dentro de la sesión: el siguiente al **mayor** existente (no a la cantidad), así borrar una serie intermedia no repite un número y no viola el `UNIQUE` (quedan huecos: 1, 3, 4).
 * **Sesión en curso / finalizada:** se inicia al crearla (`iniciada_en`, reloj del servidor) y se cierra con `POST /finalizar`. Una sesión finalizada no admite agregar ni quitar series (409); fecha y notas sí se pueden editar.
+* **CRUD de rutinas (Día 4):** `PUT` reemplaza la lista completa de ejercicios (los ítems se borran y se vuelven a crear, así que sus filas cambian de id). Todos los ejercicios se resuelven (con `ResolutorEjercicio`, igual que las series) **antes** de modificar la rutina: si uno no existe (404) o wger falla (502), la rutina queda como estaba.
+* **Sesión basada en una rutina:** `SesionDto.ejerciciosRutina` se calcula a partir de la rutina **actual** (no es una copia): si la rutina se edita, el plan de la sesión cambia; si se elimina, queda vacío. Las series ya registradas nunca cambian. Se carga en una consulta aparte de las series para no cruzar dos colecciones en el mismo `JOIN`.
 * **Índices:** las FK no se indexan solas en PostgreSQL, así que se crean `ix_rutina_usuario`, `ix_rutina_ejercicio_rutina_orden`, `ix_rutina_ejercicio_ejercicio`, `ix_sesion_usuario_fecha`, `ix_sesion_rutina`, `ix_serie_sesion` e `ix_serie_ejercicio` (este último para las consultas de progreso).
 
 **Repositorios** (`com.maxtracker.api.repository`)
@@ -173,7 +175,10 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | POST | `/api/v1/auth/register` | 3 | Crea la cuenta y devuelve un JWT (201; 409 si el email existe; 403 si el registro está deshabilitado) |
 | POST | `/api/v1/auth/login` | 3 | Obtiene JWT (401 si las credenciales no son válidas) |
 | GET | `/api/v1/sesiones` | 3 | Historial paginado del usuario (`pagina`, `tamanio` 1–100), sin series |
-| POST | `/api/v1/sesiones` | 3 | Inicia una sesión (`fecha` opcional, por defecto hoy en `APP_ZONA_HORARIA`; `rutinaId`, `notas`). 201 + `Location` |
+| GET | `/api/v1/rutinas` | 4 | Rutinas del usuario ordenadas por nombre, con `cantidadEjercicios` (sin el detalle) |
+| POST | `/api/v1/rutinas` | 4 | Crea una rutina: `nombre` (1–100), `descripcion` (≤500), `ejercicios` opcional (≤30, en orden): cada uno `wgerId` **o** `ejercicioId`, `seriesObjetivo` (1–20) y `repeticionesObjetivo` (1–999) opcionales. 201 + `Location` |
+| GET/PUT/DELETE | `/api/v1/rutinas/{id}` | 4 | Detalle con ejercicios / reemplazo completo (incluida la lista de ejercicios) / eliminar (204; las sesiones que la usaban quedan con `rutinaId = null`) |
+| POST | `/api/v1/sesiones` | 3–4 | Inicia una sesión (`fecha` opcional, por defecto hoy en `APP_ZONA_HORARIA`; `rutinaId`, `notas`). 201 + `Location`. Con `rutinaId`, la respuesta incluye `ejerciciosRutina` (plan de la rutina para precargar la sesión) |
 | GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle con series / editar fecha y notas / eliminar (204) |
 | POST | `/api/v1/sesiones/{id}/finalizar` | 3 | Finaliza la sesión (409 si ya lo estaba) |
 | POST | `/api/v1/sesiones/{id}/series` | 3 | Registra una serie: `wgerId` **o** `ejercicioId`, `pesoKg` (0–9999,99), `repeticiones` (1–999), `rir` (0–10, opcional). 201; 409 si la sesión está finalizada |

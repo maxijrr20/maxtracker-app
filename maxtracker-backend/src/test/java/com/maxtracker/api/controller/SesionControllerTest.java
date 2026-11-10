@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import com.maxtracker.api.dto.PaginaDto;
+import com.maxtracker.api.dto.rutina.RutinaEjercicioResponse;
 import com.maxtracker.api.dto.sesion.ActualizarSesionRequest;
 import com.maxtracker.api.dto.sesion.IniciarSesionRequest;
 import com.maxtracker.api.dto.sesion.RegistrarSerieRequest;
@@ -59,7 +60,7 @@ class SesionControllerTest {
     private static final SerieDto SERIE_BANCA =
             new SerieDto(100, 5, 192L, "Press de banca", 1, new BigDecimal("80.00"), 6, 2);
     private static final SesionDto SESION =
-            new SesionDto(42, HOY, null, "Pecho", INICIO, null, false, List.of(SERIE_BANCA));
+            new SesionDto(42, HOY, null, "Pecho", INICIO, null, false, List.of(), List.of(SERIE_BANCA));
 
     @Autowired
     private MockMvc mockMvc;
@@ -155,6 +156,26 @@ class SesionControllerTest {
                 .andExpect(jsonPath("$.detail").value("No existe una rutina con id 3"));
     }
 
+    @Test
+    void iniciarConRutinaDevuelveSusEjerciciosParaPrecargarlos() throws Exception {
+        RutinaEjercicioResponse banca = new RutinaEjercicioResponse(1, 5, 192L, "Press de banca", "Pecho", 4, 8);
+        given(sesionService.iniciar(USUARIO_ID, new IniciarSesionRequest(null, 3L, null)))
+                .willReturn(new SesionDto(43, HOY, 3L, null, INICIO, null, false, List.of(banca), List.of()));
+
+        ejecutar(conJson(post("/api/v1/sesiones"), """
+                        {"rutinaId": 3}
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.rutinaId").value(3))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].orden").value(1))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].ejercicioId").value(5))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].wgerId").value(192))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].ejercicioNombre").value("Press de banca"))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].seriesObjetivo").value(4))
+                .andExpect(jsonPath("$.ejerciciosRutina[0].repeticionesObjetivo").value(8))
+                .andExpect(jsonPath("$.series").isEmpty());
+    }
+
     // --- Listar / obtener ---
 
     @Test
@@ -248,7 +269,7 @@ class SesionControllerTest {
     void finalizarDevuelveLaSesionFinalizada() throws Exception {
         Instant fin = INICIO.plusSeconds(3600);
         given(sesionService.finalizar(USUARIO_ID, 42))
-                .willReturn(new SesionDto(42, HOY, null, null, INICIO, fin, true, List.of()));
+                .willReturn(new SesionDto(42, HOY, null, null, INICIO, fin, true, List.of(), List.of()));
 
         ejecutar(post("/api/v1/sesiones/42/finalizar"))
                 .andExpect(status().isOk())

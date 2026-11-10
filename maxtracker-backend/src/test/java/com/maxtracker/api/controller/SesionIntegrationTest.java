@@ -89,6 +89,8 @@ class SesionIntegrationTest {
     void limpiar() {
         jdbc.update("DELETE FROM serie_registro");
         jdbc.update("DELETE FROM sesion_entrenamiento");
+        jdbc.update("DELETE FROM rutina_ejercicio");
+        jdbc.update("DELETE FROM rutina");
         jdbc.update("DELETE FROM ejercicio");
         jdbc.update("DELETE FROM usuario");
     }
