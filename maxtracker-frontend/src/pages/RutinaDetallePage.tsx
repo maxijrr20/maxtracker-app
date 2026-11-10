@@ -14,12 +14,15 @@ import { RutinaEjercicioList } from '../components/organisms/RutinaEjercicioList
 import { TarjetaAnalisisIa } from '../components/molecules/TarjetaAnalisisIa'
 import { useAnalisisIa } from '../hooks/useAnalisisIa'
 import { useCarga } from '../hooks/useCarga'
+import { hoyEnZona } from '../lib/zonaHoraria'
+import { usePreferencias } from '../preferencias/preferenciasContext'
 
 export function RutinaDetallePage() {
   const id = Number(useParams().id)
   const navegar = useNavigate()
   const { datos: rutina, cargando, error, recargar } = useCarga((signal) => obtenerRutina(id, signal), [id])
   const analisisIa = useAnalisisIa({ rutinaId: id })
+  const { zonaHoraria } = usePreferencias()
   const [iniciando, setIniciando] = useState(false)
   const [errorInicio, setErrorInicio] = useState<string | null>(null)
 
@@ -45,7 +48,7 @@ export function RutinaDetallePage() {
     setIniciando(true)
     setErrorInicio(null)
     try {
-      await iniciarSesion({ rutinaId: id })
+      await iniciarSesion({ rutinaId: id, fecha: hoyEnZona(zonaHoraria) })
       navegar('/entrenamiento')
     } catch (causa) {
       setErrorInicio(causa instanceof ApiError ? causa.message : 'No se pudo iniciar la sesión.')

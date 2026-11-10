@@ -1,6 +1,8 @@
 package com.maxtracker.api.dto.analisis;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.Enfoque;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.UnidadPeso;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
@@ -16,7 +18,9 @@ import jakarta.validation.constraints.Positive;
  *   <li>ninguno: todos los ejercicios entrenados en el periodo.</li>
  * </ul>
  *
- * @param dias periodo de historial a considerar hacia atrás desde hoy (7–90, por defecto 28)
+ * @param dias       periodo de historial a considerar hacia atrás desde hoy (7–90, por defecto 28)
+ * @param enfoque    FUERZA, HIPERTROFIA o MANTENIMIENTO; sin él, análisis general
+ * @param unidadPeso KG (por defecto) o LB: unidad en la que la IA expresa las cargas
  */
 public record AnalisisRutinaRequest(
         @Positive(message = "debe ser un ID positivo")
@@ -27,12 +31,16 @@ public record AnalisisRutinaRequest(
 
         @Min(value = 7, message = "debe estar entre 7 y 90")
         @Max(value = 90, message = "debe estar entre 7 y 90")
-        Integer dias) {
+        Integer dias,
+
+        Enfoque enfoque,
+
+        UnidadPeso unidadPeso) {
 
     public static final int DIAS_POR_DEFECTO = 28;
 
     public static AnalisisRutinaRequest general() {
-        return new AnalisisRutinaRequest(null, null, null);
+        return new AnalisisRutinaRequest(null, null, null, null, null);
     }
 
     public int diasOPorDefecto() {

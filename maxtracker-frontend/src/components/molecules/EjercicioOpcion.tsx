@@ -18,7 +18,7 @@ export function EjercicioOpcion({ nombre, detalle, imagenUrl, onElegir }: Ejerci
     <button
       type="button"
       onClick={onElegir}
-      className="flex min-h-16 w-full items-center gap-3 rounded-2xl border border-borde bg-superficie p-2 pr-3 text-left transition-colors hover:border-zinc-700 active:bg-superficie-alta"
+      className="vidrio flex min-h-16 w-full items-center gap-3 rounded-2xl border border-borde-vidrio p-2 pr-3 text-left transition-all duration-200 hover:border-lime-500/30 active:scale-[0.98]"
     >
       <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
         {conImagen ? (
@@ -31,7 +31,7 @@ export function EjercicioOpcion({ nombre, detalle, imagenUrl, onElegir }: Ejerci
             className="size-full object-contain"
           />
         ) : (
-          <span className="grid size-full place-items-center bg-superficie-alta text-texto-suave">
+          <span className="grid size-full place-items-center bg-zinc-800 text-texto-suave">
             <Dumbbell aria-hidden className="size-6" />
           </span>
         )}

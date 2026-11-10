@@ -20,6 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxtracker.api.exception.IaNoDisponibleException;
 import com.maxtracker.api.service.ia.AsistenteEntrenamiento;
 import com.maxtracker.api.service.ia.ContextoAnalisis;
+import com.maxtracker.api.service.ia.OpcionesAnalisis;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.Enfoque;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.UnidadPeso;
 import com.maxtracker.api.service.ia.RecomendacionIa;
 import com.maxtracker.api.service.ia.RecomendacionIa.EjercicioRecomendacion;
 import com.maxtracker.api.service.ia.RecomendacionIa.Tendencia;
@@ -111,8 +114,11 @@ public class GeminiAsistente implements AsistenteEntrenamiento {
     }
 
     @Override
-    public RecomendacionIa analizar(ContextoAnalisis contexto) {
-        if (!properties.configurada()) {
+    public RecomendacionIa analizar(ContextoAnalisis contexto, OpcionesAnalisis opciones) {
+        // La clave personal del usuario (si configuró una) tiene prioridad sobre la del servidor.
+        String clave = opciones.tieneClaveUsuario() ? opciones.claveApiUsuario()
+                : properties.configurada() ? properties.apiKey() : null;
+        if (clave == null) {
             throw IaNoDisponibleException.noConfigurada();
         }
 
@@ -120,8 +126,8 @@ public class GeminiAsistente implements AsistenteEntrenamiento {
         try {
             respuesta = geminiRestClient.post()
                     .uri("models/{modelo}:generateContent", properties.modelo())
-                    .header("x-goog-api-key", properties.apiKey())
-                    .body(cuerpo(contexto))
+                    .header("x-goog-api-key", clave)
+                    .body(cuerpo(contexto, opciones))
                     .retrieve()
                     .body(GeminiRespuesta.class);
         } catch (RestClientResponseException e) {
@@ -129,6 +135,13 @@ public class GeminiAsistente implements AsistenteEntrenamiento {
             if (status.value() == 429) {
                 log.warn("Gemini: cuota agotada (429)");
                 throw IaNoDisponibleException.cuotaAgotada(e);
+            }
+            // Con la clave del usuario, un 400/401/403 es casi siempre esa clave: se le avisa a él (no es un error
+            // del servidor). El cuerpo de la respuesta no se registra: podría repetir parte de la clave.
+            if (opciones.tieneClaveUsuario() && (status.value() == 400 || status.value() == 401
+                    || status.value() == 403)) {
+                log.info("Gemini rechazó la clave personal de un usuario ({})", status.value());
+                throw IaNoDisponibleException.claveUsuarioInvalida(e);
             }
             // 400/401/403/404 suelen ser configuración (clave inválida, modelo retirado): se registra como error.
             if (status.is4xxClientError()) {
@@ -146,18 +159,36 @@ public class GeminiAsistente implements AsistenteEntrenamiento {
         return interpretar(respuesta);
     }
 
-    private Map<String, Object> cuerpo(ContextoAnalisis contexto) {
+    /** Criterios por enfoque; el usuario los elige en su perfil. */
+    private static final Map<Enfoque, String> ENFOQUES = Map.of(
+            Enfoque.FUERZA, "FUERZA: prioriza subir la carga máxima con 1–6 repeticiones, RIR 1–3 y descansos de "
+                    + "3–5 minutos; el volumen es secundario.",
+            Enfoque.HIPERTROFIA, "HIPERTROFIA: prioriza el volumen efectivo con 6–12 repeticiones cerca del fallo "
+                    + "(RIR 0–3) y una progresión de carga o repeticiones semana a semana.",
+            Enfoque.MANTENIMIENTO, "MANTENIMIENTO: el objetivo es sostener el nivel con menos volumen y esfuerzo "
+                    + "(RIR 2–4); un estancamiento no es un problema si la carga se mantiene.");
+
+    private Map<String, Object> cuerpo(ContextoAnalisis contexto, OpcionesAnalisis opciones) {
         String datos;
         try {
             datos = objectMapper.writeValueAsString(contexto);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("No se pudo serializar el contexto del análisis", e);
         }
+        String enfoque = opciones.enfoque() == null
+                ? "Enfoque: general (equilibra fuerza e hipertrofia)."
+                : "Enfoque del usuario: " + ENFOQUES.get(opciones.enfoque());
+        String unidad = opciones.unidadPeso() == UnidadPeso.LB
+                ? "Los datos están en kg, pero el usuario usa libras: expresa todas las cargas de tu respuesta en lb "
+                        + "(1 kg = 2,2046 lb), redondeadas a incrementos de 5 lb."
+                : "Expresa las cargas en kg, redondeadas a incrementos de 2,5 kg.";
         String prompt = """
                 Analiza este historial de entrenamiento (JSON). Pesos en kg; fechas ISO; "dias" es el periodo \
                 analizado hasta "hoy".
+                %s
+                %s
 
-                %s""".formatted(datos);
+                %s""".formatted(enfoque, unidad, datos);
 
         return Map.of(
                 "systemInstruction", Map.of("parts", List.of(Map.of("text", INSTRUCCION_SISTEMA))),

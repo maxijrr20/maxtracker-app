@@ -13,10 +13,10 @@ export function Chip({ activo, className, type = 'button', ...resto }: ChipProps
       type={type}
       aria-pressed={activo}
       className={cx(
-        'inline-flex min-h-tactil shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-colors',
+        'inline-flex min-h-tactil shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-all duration-200 active:scale-95',
         activo
-          ? 'border-acento bg-acento text-sobre-acento'
-          : 'border-borde bg-superficie text-texto hover:bg-superficie-alta',
+          ? 'border-lime-300/70 bg-acento text-sobre-acento shadow-neon'
+          : 'border-borde-vidrio bg-zinc-900/60 text-texto hover:border-zinc-700 hover:bg-zinc-800/70',
         className,
       )}
       {...resto}

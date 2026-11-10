@@ -1,23 +1,33 @@
 import type { ReactNode } from 'react'
 
+import { usePeso } from '../../hooks/usePeso'
 import { cx } from '../../lib/cx'
 
-type Tono = 'neutro' | 'acento' | 'peso' | 'rir' | 'exito'
+type Tono = 'neutro' | 'lima' | 'exito' | 'alerta'
 
 const TONOS: Record<Tono, string> = {
-  neutro: 'bg-superficie-alta text-zinc-200',
-  acento: 'bg-lime-400/15 text-lime-300',
-  peso: 'bg-sky-400/15 text-sky-200',
-  rir: 'bg-amber-400/15 text-amber-200',
-  exito: 'bg-emerald-400/15 text-emerald-300',
+  neutro: 'border-zinc-700/60 bg-zinc-800/70 text-zinc-200',
+  // Datos de entrenamiento (peso, RIR, objetivo): lima semitransparente.
+  lima: 'border-lime-500/20 bg-lime-500/10 text-lime-400',
+  exito: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  alerta: 'border-amber-400/20 bg-amber-400/10 text-amber-200',
 }
 
-/** Etiqueta compacta e informativa (no interactiva): peso, RIR, objetivos, estado. */
-export function Badge({ tono = 'neutro', children, className }: { tono?: Tono; children: ReactNode; className?: string }) {
+export interface BadgeProps {
+  tono?: Tono
+  /** Monoespaciada, para cifras (peso, RIR, series). */
+  mono?: boolean
+  children: ReactNode
+  className?: string
+}
+
+/** Etiqueta compacta e informativa (no interactiva) en forma de píldora. */
+export function Badge({ tono = 'neutro', mono = false, children, className }: BadgeProps) {
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-sm font-semibold tabular-nums',
+        'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold tabular-nums',
+        mono && 'font-mono',
         TONOS[tono],
         className,
       )}
@@ -27,16 +37,20 @@ export function Badge({ tono = 'neutro', children, className }: { tono?: Tono; c
   )
 }
 
-const FORMATO_PESO = new Intl.NumberFormat('es', { maximumFractionDigits: 2 })
-
+/** Peso en la unidad que eligió el usuario (los datos están siempre en kg). */
 export function PesoBadge({ kg }: { kg: number }) {
-  return <Badge tono="peso">{FORMATO_PESO.format(kg)} kg</Badge>
+  const { formato } = usePeso()
+  return (
+    <Badge tono="lima" mono>
+      {formato(kg)}
+    </Badge>
+  )
 }
 
 /** RIR = repeticiones en reserva (0 = al fallo). */
 export function RirBadge({ rir }: { rir: number }) {
   return (
-    <Badge tono="rir">
+    <Badge tono="lima" mono>
       <abbr title="Repeticiones en reserva" className="no-underline">
         RIR
       </abbr>{' '}

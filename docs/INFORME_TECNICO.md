@@ -186,7 +186,7 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | GET | `/api/v1/metricas/resumen` | 7 | Volumen (Σ peso × reps), sesiones y series de la semana y el mes actuales y anteriores; volumen por semana (`semanas` 4–52, por defecto 12, incluidas las semanas vacías); récords personales |
 | GET | `/api/v1/metricas/ejercicios` | 7 | Ejercicios con series, del usado más recientemente al más antiguo |
 | GET | `/api/v1/metricas/ejercicios/{id}/progreso` | 7 | Un punto por sesión: peso máx., volumen y 1RM estimado (Epley). 404 si el ejercicio no es accesible |
-| POST | `/api/v1/analisis/rutina` | 7 | Análisis con IA (Gemini): sobrecarga progresiva por ejercicio, ajuste de RIR y sugerencias. Cuerpo opcional: `rutinaId` **o** `sesionId`, `dias` (7–90, por defecto 28). 422 sin series en el periodo; 429 + `Retry-After` si se pide otro antes de 20 s; 503 si la IA no está configurada o falla |
+| POST | `/api/v1/analisis/rutina` | 7 | Análisis con IA (Gemini): sobrecarga progresiva por ejercicio, ajuste de RIR y sugerencias. Cuerpo opcional: `rutinaId` **o** `sesionId`, `dias` (7–90, por defecto 28), `enfoque` (`FUERZA`/`HIPERTROFIA`/`MANTENIMIENTO`), `unidadPeso` (`KG`/`LB`, unidad de la respuesta). Cabecera opcional `X-Gemini-Api-Key`: clave personal del usuario, usada en lugar de la del servidor y nunca guardada ni registrada. 422 sin series en el periodo; 429 + `Retry-After` si se pide otro antes de 20 s; 503 si la IA no está configurada o falla |
 | GET | `/actuator/health` | 1 | Health check (Render) |
 
 Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `timestamp`.

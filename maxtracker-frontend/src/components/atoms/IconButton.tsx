@@ -11,8 +11,8 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
 }
 
 const VARIANTES = {
-  fantasma: 'text-texto-suave hover:bg-superficie-alta hover:text-texto',
-  secundario: 'bg-superficie-alta text-texto hover:bg-zinc-700',
+  fantasma: 'text-texto-suave hover:bg-white/5 hover:text-texto',
+  secundario: 'border border-borde-vidrio bg-zinc-800/70 text-texto hover:bg-zinc-700/70',
   peligro: 'text-peligro hover:bg-red-500/15',
 } as const
 
@@ -24,7 +24,7 @@ export function IconButton({ icono: Icono, etiqueta, variante = 'fantasma', clas
       aria-label={etiqueta}
       title={etiqueta}
       className={cx(
-        'inline-grid size-tactil shrink-0 place-items-center rounded-xl transition-colors active:scale-95',
+        'inline-grid size-tactil shrink-0 place-items-center rounded-xl transition-all duration-200 active:scale-95',
         'disabled:cursor-not-allowed disabled:opacity-50',
         VARIANTES[variante],
         className,

@@ -2,7 +2,8 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 
 import type { VolumenSemanal } from '../../api/types'
 import { COLOR_GRAFICO } from '../../lib/coloresGrafico'
-import { fechaCorta, formatoKg, formatoKgCompacto } from '../../lib/formato'
+import { usePeso } from '../../hooks/usePeso'
+import { fechaCorta } from '../../lib/formato'
 import { Card } from '../atoms/Card'
 import { Titulo } from '../atoms/Typography'
 import { TablaGrafico } from '../molecules/TablaGrafico'
@@ -19,6 +20,7 @@ interface Punto {
  * extremo redondeado de 4 px y base recta. Tooltip por columna y tabla equivalente.
  */
 export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }) {
+  const { formato: formatoPeso, formatoCompacto: formatoPesoCompacto } = usePeso()
   const datos: Punto[] = semanas.map((s) => ({
     semana: `Sem. ${fechaCorta(s.inicioSemana)}`,
     volumen: s.volumenKg,
@@ -46,7 +48,7 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
               minTickGap={16}
             />
             <YAxis
-              tickFormatter={formatoKgCompacto}
+              tickFormatter={formatoPesoCompacto}
               tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
               axisLine={false}
               tickLine={false}
@@ -60,7 +62,7 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
                 return (
                   <TooltipGrafico
                     activo={active}
-                    valor={punto ? formatoKg(punto.volumen) : undefined}
+                    valor={punto ? formatoPeso(punto.volumen) : undefined}
                     etiqueta={punto?.semana}
                     serie="volumen"
                     detalle={punto ? `${punto.sesiones} ${punto.sesiones === 1 ? 'sesión' : 'sesiones'}` : undefined}
@@ -83,7 +85,7 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
       <TablaGrafico
         titulo="Volumen por semana"
         columnas={['Semana del', 'Volumen', 'Sesiones']}
-        filas={semanas.map((s) => [fechaCorta(s.inicioSemana), formatoKg(s.volumenKg), String(s.sesiones)])}
+        filas={semanas.map((s) => [fechaCorta(s.inicioSemana), formatoPeso(s.volumenKg), String(s.sesiones)])}
       />
     </Card>
   )

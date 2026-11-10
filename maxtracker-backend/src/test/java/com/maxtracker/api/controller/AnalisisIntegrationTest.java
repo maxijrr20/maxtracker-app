@@ -46,6 +46,7 @@ import com.maxtracker.api.service.EjercicioService;
 import com.maxtracker.api.service.ia.AsistenteEntrenamiento;
 import com.maxtracker.api.service.ia.ContextoAnalisis;
 import com.maxtracker.api.service.ia.ContextoAnalisis.EjercicioContexto;
+import com.maxtracker.api.service.ia.OpcionesAnalisis;
 import com.maxtracker.api.service.ia.RecomendacionIa;
 import com.maxtracker.api.service.ia.RecomendacionIa.EjercicioRecomendacion;
 import com.maxtracker.api.service.ia.RecomendacionIa.Tendencia;
@@ -122,7 +123,7 @@ class AnalisisIntegrationTest {
         banca = ejercicioRepository.save(Ejercicio.desdeWger(192, "Press de banca", "Pecho"));
         remo = ejercicioRepository.save(Ejercicio.desdeWger(106, "Remo con barra", "Espalda"));
         hoy = LocalDate.now(clock);
-        given(asistente.analizar(any())).willReturn(RECOMENDACION);
+        given(asistente.analizar(any(), any())).willReturn(RECOMENDACION);
     }
 
     private ResultActions analizar(Usuario usuario, String json) throws Exception {
@@ -130,6 +131,28 @@ class AnalisisIntegrationTest {
         var peticion = post("/api/v1/analisis/rutina").header(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         return mockMvc.perform(json == null ? peticion
                 : peticion.contentType(MediaType.APPLICATION_JSON).content(json));
+    }
+
+    @Test
+    void laClavePersonalYElEnfoqueLleganAlPuertoYNoAlPrompt() throws Exception {
+        sesion(max, hoy, null, banca, "80x6");
+        String token = jwtService.generarToken(UsuarioAutenticado.desde(max)).valor();
+
+        mockMvc.perform(post("/api/v1/analisis/rutina")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .header("X-Gemini-Api-Key", "AIza-clave-personal")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"enfoque\": \"HIPERTROFIA\", \"unidadPeso\": \"LB\"}"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ContextoAnalisis> contexto = ArgumentCaptor.forClass(ContextoAnalisis.class);
+        ArgumentCaptor<OpcionesAnalisis> opciones = ArgumentCaptor.forClass(OpcionesAnalisis.class);
+        verify(asistente).analizar(contexto.capture(), opciones.capture());
+        assertThat(opciones.getValue().claveApiUsuario()).isEqualTo("AIza-clave-personal");
+        assertThat(opciones.getValue().enfoque()).isEqualTo(OpcionesAnalisis.Enfoque.HIPERTROFIA);
+        assertThat(opciones.getValue().unidadPeso()).isEqualTo(OpcionesAnalisis.UnidadPeso.LB);
+        // El contexto (lo que se serializa en el prompt) nunca lleva la clave.
+        assertThat(objectMapper.writeValueAsString(contexto.getValue())).doesNotContain("AIza-clave-personal");
     }
 
     private SesionEntrenamiento sesion(Usuario usuario, LocalDate fecha, Rutina rutina, Ejercicio ejercicio,
@@ -152,7 +175,7 @@ class AnalisisIntegrationTest {
 
     private ContextoAnalisis contextoEnviado() {
         ArgumentCaptor<ContextoAnalisis> captor = ArgumentCaptor.forClass(ContextoAnalisis.class);
-        verify(asistente).analizar(captor.capture());
+        verify(asistente).analizar(captor.capture(), any());
         return captor.getValue();
     }
 
@@ -233,7 +256,7 @@ class AnalisisIntegrationTest {
         analizar(max, "{\"rutinaId\": %d}".formatted(rutinaRepository.save(new Rutina(max, "Vacía", null)).getId()))
                 .andExpect(status().isUnprocessableEntity());
 
-        verify(asistente, never()).analizar(any());
+        verify(asistente, never()).analizar(any(), any());
     }
 
     @Test
@@ -247,7 +270,7 @@ class AnalisisIntegrationTest {
         analizar(otro, "{\"sesionId\": %d}".formatted(sesion.getId()))
                 .andExpect(status().isNotFound());
 
-        verify(asistente, never()).analizar(any());
+        verify(asistente, never()).analizar(any(), any());
     }
 
     @Test
@@ -267,7 +290,7 @@ class AnalisisIntegrationTest {
     @Test
     void siLaIaFallaResponde503() throws Exception {
         sesion(max, hoy, null, banca, "80x6");
-        given(asistente.analizar(any())).willThrow(IaNoDisponibleException.cuotaAgotada(null));
+        given(asistente.analizar(any(), any())).willThrow(IaNoDisponibleException.cuotaAgotada(null));
 
         analizar(max, null)
                 .andExpect(status().isServiceUnavailable())

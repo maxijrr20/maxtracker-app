@@ -21,6 +21,8 @@ import { SesionActivaCard } from '../components/organisms/SesionActivaCard'
 import { TarjetaAnalisisIa } from '../components/molecules/TarjetaAnalisisIa'
 import { useAnalisisIa } from '../hooks/useAnalisisIa'
 import { useCarga } from '../hooks/useCarga'
+import { hoyEnZona } from '../lib/zonaHoraria'
+import { usePreferencias } from '../preferencias/preferenciasContext'
 import { claveEjercicio, type EjercicioElegido } from '../lib/ejercicioElegido'
 import { guardarPendientes, leerPendientes } from '../lib/ejerciciosPendientes'
 
@@ -113,6 +115,7 @@ export function EntrenamientoPage() {
   const [errorAccion, setErrorAccion] = useState<string | null>(null)
   // Al finalizar se pide automáticamente el análisis de la sesión (una vez; luego, a demanda).
   const analisisIa = useAnalisisIa({ sesionId: datos?.sesion?.id })
+  const { zonaHoraria, descansoSegundos } = usePreferencias()
 
   if (cargando) return <Spinner etiqueta="Buscando tu sesión…" />
 
@@ -133,7 +136,7 @@ export function EntrenamientoPage() {
     setIniciandoLibre(true)
     setErrorAccion(null)
     try {
-      setDatos({ sesion: await iniciarSesion() })
+      setDatos({ sesion: await iniciarSesion({ fecha: hoyEnZona(zonaHoraria) }) })
       setSelectorAbierto(true)
     } catch (causa) {
       setErrorAccion(causa instanceof ApiError ? causa.message : 'No se pudo iniciar la sesión.')
@@ -272,7 +275,7 @@ export function EntrenamientoPage() {
         />
       )}
 
-      {enCurso && <DescansoTimer disparador={seriesRegistradas} />}
+      {enCurso && <DescansoTimer disparador={seriesRegistradas} duracionInicial={descansoSegundos} />}
 
       {ejercicios.length === 0 ? (
         <EmptyState
@@ -302,7 +305,7 @@ export function EntrenamientoPage() {
                   seriesHechas={ejercicio.series.length}
                 >
                   {ejercicio.series.length > 0 && (
-                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col divide-y divide-borde">
+                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col gap-2">
                       {ejercicio.series.map((serie) => (
                         <SerieRow key={serie.id} serie={serie} onEliminar={enCurso ? quitarSerie : undefined} />
                       ))}

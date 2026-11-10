@@ -9,10 +9,12 @@ import { DashboardPage } from './pages/DashboardPage'
 import { EntrenamientoPage } from './pages/EntrenamientoPage'
 import { LoginPage } from './pages/LoginPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { PerfilPage } from './pages/PerfilPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { RutinaDetallePage } from './pages/RutinaDetallePage'
 import { RutinaFormPage } from './pages/RutinaFormPage'
 import { RutinasPage } from './pages/RutinasPage'
+import { PreferenciasProvider } from './preferencias/PreferenciasProvider'
 
 const router = createBrowserRouter([
   {
@@ -41,6 +43,7 @@ const router = createBrowserRouter([
           { path: '/rutinas/:id', element: <RutinaDetallePage /> },
           { path: '/rutinas/:id/editar', element: <RutinaFormPage /> },
           { path: '/entrenamiento', element: <EntrenamientoPage /> },
+          { path: '/perfil', element: <PerfilPage /> },
         ],
       },
     ],
@@ -50,9 +53,11 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-      <ActualizacionAviso />
-    </AuthProvider>
+    <PreferenciasProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <ActualizacionAviso />
+      </AuthProvider>
+    </PreferenciasProvider>
   )
 }

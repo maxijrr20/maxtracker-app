@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react'
 
 import type { Serie } from '../../api/types'
-import { Badge, PesoBadge, RirBadge } from '../atoms/Badge'
+import { PesoBadge, RirBadge } from '../atoms/Badge'
 import { IconButton } from '../atoms/IconButton'
 
 export interface SerieRowProps {
@@ -11,22 +11,28 @@ export interface SerieRowProps {
   deshabilitada?: boolean
 }
 
-/** Una serie registrada: número, peso × repeticiones y RIR. */
+/**
+ * Una serie registrada como fila estilizada: número grande en monoespaciada (se lee a un brazo de distancia),
+ * peso y RIR en píldoras lima, repeticiones en cifra fuerte.
+ */
 export function SerieRow({ serie, onEliminar, deshabilitada = false }: SerieRowProps) {
   return (
-    <li className="flex min-h-tactil items-center gap-3 py-1">
-      <span
-        aria-label={`Serie ${serie.numeroSerie}`}
-        className="grid size-9 shrink-0 place-items-center rounded-lg bg-superficie-alta text-sm font-bold tabular-nums"
-      >
-        {serie.numeroSerie}
+    <li className="group flex min-h-14 items-center gap-3 rounded-xl border border-white/5 bg-linear-to-r from-white/[0.04] to-transparent py-1.5 pl-3 pr-1 transition-all duration-200 hover:border-lime-500/20">
+      <span className="flex w-12 shrink-0 flex-col items-center gap-0.5 leading-none">
+        <span className="text-xs font-semibold uppercase tracking-wider text-texto-suave">Serie</span>
+        <span className="font-mono text-2xl font-bold tabular-nums text-acento drop-shadow-neon">
+          {String(serie.numeroSerie).padStart(2, '0')}
+        </span>
       </span>
       <div className="flex flex-1 flex-wrap items-center gap-2">
         <PesoBadge kg={serie.pesoKg} />
-        <span aria-hidden className="text-texto-suave">
-          ×
+        <span className="font-mono text-base font-bold tabular-nums text-texto">
+          <span aria-hidden className="text-texto-suave">
+            ×{' '}
+          </span>
+          {serie.repeticiones}
+          <span className="ml-1 font-sans text-sm font-medium text-texto-suave">reps</span>
         </span>
-        <Badge>{serie.repeticiones} reps</Badge>
         {serie.rir !== null && <RirBadge rir={serie.rir} />}
       </div>
       {onEliminar && (
@@ -36,6 +42,7 @@ export function SerieRow({ serie, onEliminar, deshabilitada = false }: SerieRowP
           variante="peligro"
           disabled={deshabilitada}
           onClick={() => onEliminar(serie)}
+          className="opacity-70 group-hover:opacity-100 focus-visible:opacity-100"
         />
       )}
     </li>

@@ -2,7 +2,8 @@ import { Trophy } from 'lucide-react'
 import { useState } from 'react'
 
 import type { RecordPersonal } from '../../api/types'
-import { aFecha, fechaCorta, formatoKg } from '../../lib/formato'
+import { usePeso } from '../../hooks/usePeso'
+import { aFecha, fechaCorta } from '../../lib/formato'
 import { Badge } from '../atoms/Badge'
 import { Button } from '../atoms/Button'
 import { Card } from '../atoms/Card'
@@ -18,6 +19,7 @@ export interface RecordsListProps {
 
 /** Récords personales (mayor peso por ejercicio), del más reciente al más antiguo. */
 export function RecordsList({ records }: RecordsListProps) {
+  const { formato: formatoPeso } = usePeso()
   const [todos, setTodos] = useState(false)
   // Récords de los últimos días = "Nuevo". El instante se fija al montar (no en cada render).
   const [limiteNuevo] = useState(() => Date.now() - DIAS_NUEVO * 24 * 60 * 60 * 1000)
@@ -35,10 +37,10 @@ export function RecordsList({ records }: RecordsListProps) {
         />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-borde">
+          <ul className="flex flex-col divide-y divide-borde-vidrio">
             {visibles.map((record) => (
               <li key={record.ejercicioId} className="flex min-h-16 items-center gap-3 py-2">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-superficie-alta text-acento">
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 text-acento">
                   <Trophy aria-hidden className="size-5" />
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col">
@@ -47,11 +49,11 @@ export function RecordsList({ records }: RecordsListProps) {
                     {aFecha(record.fecha).getTime() >= limiteNuevo && <Badge tono="exito">Nuevo</Badge>}
                   </span>
                   <span className="text-sm text-texto-suave">
-                    {fechaCorta(record.fecha)} · 1RM est. {formatoKg(record.unoRmEstimadoKg)}
+                    {fechaCorta(record.fecha)} · 1RM est. {formatoPeso(record.unoRmEstimadoKg)}
                   </span>
                 </div>
                 <span className="shrink-0 text-right">
-                  <span className="block text-lg font-bold tabular-nums">{formatoKg(record.pesoMaxKg)}</span>
+                  <span className="block font-mono text-lg font-bold tabular-nums text-acento">{formatoPeso(record.pesoMaxKg)}</span>
                   <span className="block text-sm tabular-nums text-texto-suave">× {record.repeticiones} reps</span>
                 </span>
               </li>

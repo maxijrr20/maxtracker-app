@@ -34,6 +34,7 @@ import com.maxtracker.api.service.ia.ContextoAnalisis;
 import com.maxtracker.api.service.ia.ContextoAnalisis.EjercicioContexto;
 import com.maxtracker.api.service.ia.ContextoAnalisis.SerieContexto;
 import com.maxtracker.api.service.ia.ContextoAnalisis.SesionContexto;
+import com.maxtracker.api.service.ia.OpcionesAnalisis;
 import com.maxtracker.api.service.ia.RecomendacionIa;
 import com.maxtracker.api.service.metricas.CalculadoraMetricas;
 
@@ -86,7 +87,7 @@ public class IaAnalisisService implements AnalisisService {
     }
 
     @Override
-    public AnalisisRutinaResponse analizar(long usuarioId, AnalisisRutinaRequest request) {
+    public AnalisisRutinaResponse analizar(long usuarioId, AnalisisRutinaRequest request, String claveApiUsuario) {
         int dias = request.diasOPorDefecto();
         LocalDate hoy = LocalDate.now(clock);
         LocalDate desde = hoy.minusDays(dias - 1L);
@@ -107,7 +108,8 @@ public class IaAnalisisService implements AnalisisService {
         // Solo cuenta para el límite si de verdad se va a consultar a la IA.
         limitador.registrar(usuarioId);
         RecomendacionIa recomendacion = asistente.analizar(
-                new ContextoAnalisis(alcance.descripcion(), hoy, dias, ejercicios));
+                new ContextoAnalisis(alcance.descripcion(), hoy, dias, ejercicios),
+                new OpcionesAnalisis(request.enfoque(), request.unidadPeso(), claveApiUsuario));
 
         return new AnalisisRutinaResponse(alcance.descripcion(), recomendacion.resumen(),
                 recomendacion.ejercicios().stream()

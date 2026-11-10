@@ -51,19 +51,19 @@ export function Sheet({ abierto, onCerrar, titulo, children, pie, className }: S
         if (e.target === e.currentTarget) onCerrar()
       }}
       className={cx(
-        'm-0 mt-auto h-[92dvh] max-h-none w-full max-w-none flex-col rounded-t-3xl border border-borde bg-fondo p-0 text-texto open:flex',
-        'backdrop:bg-black/75 md:m-auto md:h-auto md:max-h-[85dvh] md:max-w-lg md:rounded-3xl',
+        'm-0 mt-auto h-[92dvh] max-h-none w-full max-w-none flex-col rounded-t-3xl border border-borde-vidrio bg-zinc-950/85 p-0 text-texto shadow-2xl backdrop-blur-xl open:flex',
+        'backdrop:bg-black/70 backdrop:backdrop-blur-sm md:m-auto md:h-auto md:max-h-[85dvh] md:max-w-lg md:rounded-3xl',
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-borde py-2 pl-4 pr-2">
+      <header className="flex items-center justify-between gap-3 border-b border-borde-vidrio py-2 pl-4 pr-2">
         <h2 id={idTitulo} className="text-lg font-semibold">
           {titulo}
         </h2>
         <IconButton icono={X} etiqueta="Cerrar" onClick={onCerrar} />
       </header>
       <div className="flex-1 overflow-y-auto overscroll-contain p-4">{abierto && children}</div>
-      {pie && <footer className="border-t border-borde p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{pie}</footer>}
+      {pie && <footer className="border-t border-borde-vidrio p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{pie}</footer>}
     </dialog>
   )
 }

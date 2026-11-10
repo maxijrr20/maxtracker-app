@@ -224,4 +224,8 @@ export interface SolicitudAnalisis {
   sesionId?: number
   /** 7–90, por defecto 28. */
   dias?: number
+  /** Sin enfoque, análisis general. */
+  enfoque?: 'FUERZA' | 'HIPERTROFIA' | 'MANTENIMIENTO'
+  /** Unidad en la que la IA expresa las cargas. */
+  unidadPeso?: 'KG' | 'LB'
 }

@@ -11,8 +11,14 @@ public class IaNoDisponibleException extends RuntimeException {
     }
 
     public static IaNoDisponibleException noConfigurada() {
-        return new IaNoDisponibleException(
-                "El análisis con IA no está configurado en el servidor (falta GEMINI_API_KEY)", null);
+        return new IaNoDisponibleException("El análisis con IA no está configurado: agrega tu clave de Gemini en "
+                + "Perfil, o configura GEMINI_API_KEY en el servidor", null);
+    }
+
+    /** La clave personal que envió el usuario fue rechazada por el proveedor. */
+    public static IaNoDisponibleException claveUsuarioInvalida(Throwable causa) {
+        return new IaNoDisponibleException("Gemini rechazó la clave configurada en tu perfil. Revisa que sea "
+                + "correcta y que tenga acceso a la API de Gemini", causa);
     }
 
     public static IaNoDisponibleException cuotaAgotada(Throwable causa) {

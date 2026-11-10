@@ -6,10 +6,10 @@ import { Button } from '../atoms/Button'
 import { Card } from '../atoms/Card'
 import { Alert } from './Alert'
 
-const TENDENCIAS: Record<Tendencia, { etiqueta: string; icono: LucideIcon; tono: 'exito' | 'neutro' | 'rir' }> = {
+const TENDENCIAS: Record<Tendencia, { etiqueta: string; icono: LucideIcon; tono: 'exito' | 'neutro' | 'alerta' }> = {
   PROGRESA: { etiqueta: 'Progresa', icono: TrendingUp, tono: 'exito' },
   ESTANCADO: { etiqueta: 'Estancado', icono: Minus, tono: 'neutro' },
-  RETROCEDE: { etiqueta: 'Retrocede', icono: TrendingDown, tono: 'rir' },
+  RETROCEDE: { etiqueta: 'Retrocede', icono: TrendingDown, tono: 'alerta' },
   SIN_DATOS_SUFICIENTES: { etiqueta: 'Pocos datos', icono: Minus, tono: 'neutro' },
 }
 
@@ -38,7 +38,7 @@ export function TarjetaAnalisisIa({
   textoBoton = 'Analizar con IA',
 }: TarjetaAnalisisIaProps) {
   return (
-    <Card className="flex flex-col gap-4 border-sky-400/25" aria-busy={cargando || undefined}>
+    <Card tono="ia" className="flex flex-col gap-4" aria-busy={cargando || undefined}>
       <div className="flex items-start gap-3">
         <span className="grid size-tactil shrink-0 place-items-center rounded-xl bg-sky-400/15 text-sky-200">
           <Sparkles aria-hidden className="size-6" />
@@ -69,7 +69,7 @@ export function TarjetaAnalisisIa({
                 {analisis.ejercicios.map((e, i) => {
                   const t = TENDENCIAS[e.tendencia] ?? TENDENCIAS.SIN_DATOS_SUFICIENTES
                   return (
-                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-xl bg-superficie-alta p-3">
+                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-xl border border-white/5 bg-zinc-950/40 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-semibold">{e.ejercicio}</span>
                         <Badge tono={t.tono}>

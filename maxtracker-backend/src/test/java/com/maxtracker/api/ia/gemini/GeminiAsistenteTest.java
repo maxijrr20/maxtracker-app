@@ -33,6 +33,9 @@ import com.maxtracker.api.service.ia.ContextoAnalisis;
 import com.maxtracker.api.service.ia.ContextoAnalisis.EjercicioContexto;
 import com.maxtracker.api.service.ia.ContextoAnalisis.SerieContexto;
 import com.maxtracker.api.service.ia.ContextoAnalisis.SesionContexto;
+import com.maxtracker.api.service.ia.OpcionesAnalisis;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.Enfoque;
+import com.maxtracker.api.service.ia.OpcionesAnalisis.UnidadPeso;
 import com.maxtracker.api.service.ia.RecomendacionIa;
 import com.maxtracker.api.service.ia.RecomendacionIa.Tendencia;
 
@@ -109,7 +112,7 @@ class GeminiAsistenteTest {
                         Matchers.containsString("\"pesoKg\":82.50"))))
                 .andRespond(withSuccess(respuestaCon(SALIDA_MODELO), MediaType.APPLICATION_JSON));
 
-        RecomendacionIa recomendacion = asistente(CLAVE).analizar(CONTEXTO);
+        RecomendacionIa recomendacion = asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO);
 
         server.verify();
         assertThat(recomendacion.resumen()).isEqualTo("Vas bien en press de banca.");
@@ -129,13 +132,13 @@ class GeminiAsistenteTest {
         server.expect(requestTo(Matchers.not(Matchers.containsString(CLAVE))))
                 .andRespond(withServerError());
 
-        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO)).isInstanceOf(IaNoDisponibleException.class);
+        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO)).isInstanceOf(IaNoDisponibleException.class);
         server.verify();
     }
 
     @Test
     void sinClaveNoLlamaAGeminiYAvisaQueNoEstaConfigurada() {
-        assertThatThrownBy(() -> asistente("  ").analizar(CONTEXTO))
+        assertThatThrownBy(() -> asistente("  ").analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO))
                 .isInstanceOf(IaNoDisponibleException.class)
                 .hasMessageContaining("GEMINI_API_KEY");
         server.verify(); // ninguna petición
@@ -145,7 +148,7 @@ class GeminiAsistenteTest {
     void cuotaAgotada429() {
         server.expect(requestTo(URL)).andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
 
-        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO))
+        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO))
                 .isInstanceOf(IaNoDisponibleException.class)
                 .hasMessageContaining("límite de uso gratuito");
     }
@@ -155,7 +158,7 @@ class GeminiAsistenteTest {
         server.expect(requestTo(URL)).andRespond(withBadRequest().body("{\"error\": {\"message\": \"API key not valid\"}}")
                 .contentType(MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO))
+        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO))
                 .isInstanceOf(IaNoDisponibleException.class)
                 .hasMessageContaining("no está disponible");
     }
@@ -165,7 +168,7 @@ class GeminiAsistenteTest {
         server.expect(requestTo(URL))
                 .andRespond(withSuccess(respuestaCon("{\"resumen\": \"Vas bi"), MediaType.APPLICATION_JSON));
 
-        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO))
+        assertThatThrownBy(() -> asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO))
                 .isInstanceOf(IaNoDisponibleException.class)
                 .hasMessageContaining("formato inesperado");
     }
@@ -180,8 +183,8 @@ class GeminiAsistenteTest {
                 """, MediaType.APPLICATION_JSON));
 
         GeminiAsistente asistente = asistente(CLAVE);
-        assertThatThrownBy(() -> asistente.analizar(CONTEXTO)).hasMessageContaining("contenido bloqueado");
-        assertThatThrownBy(() -> asistente.analizar(CONTEXTO)).hasMessageContaining("MAX_TOKENS");
+        assertThatThrownBy(() -> asistente.analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO)).hasMessageContaining("contenido bloqueado");
+        assertThatThrownBy(() -> asistente.analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO)).hasMessageContaining("MAX_TOKENS");
     }
 
     @Test
@@ -194,9 +197,79 @@ class GeminiAsistenteTest {
                 "sugerencias", java.util.Collections.nCopies(20, "s")));
         server.expect(requestTo(URL)).andRespond(withSuccess(respuestaCon(salida), MediaType.APPLICATION_JSON));
 
-        RecomendacionIa recomendacion = asistente(CLAVE).analizar(CONTEXTO);
+        RecomendacionIa recomendacion = asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO);
 
         assertThat(recomendacion.ajusteRir()).hasSize(GeminiAsistente.MAX_TEXTO).endsWith("…");
         assertThat(recomendacion.sugerencias()).hasSize(GeminiAsistente.MAX_SUGERENCIAS);
+    }
+
+    // --- Clave personal, enfoque y unidad ---
+
+    @Test
+    void laClavePersonalDelUsuarioTienePrioridadSobreLaDelServidor() throws Exception {
+        server.expect(requestTo(URL))
+                .andExpect(header("x-goog-api-key", "clave-personal"))
+                .andRespond(withSuccess(respuestaCon(SALIDA_MODELO), MediaType.APPLICATION_JSON));
+
+        asistente(CLAVE).analizar(CONTEXTO, new OpcionesAnalisis(null, UnidadPeso.KG, "clave-personal"));
+
+        server.verify();
+    }
+
+    @Test
+    void conClavePersonalFuncionaAunqueElServidorNoTengaClave() throws Exception {
+        server.expect(requestTo(URL))
+                .andExpect(header("x-goog-api-key", "clave-personal"))
+                .andRespond(withSuccess(respuestaCon(SALIDA_MODELO), MediaType.APPLICATION_JSON));
+
+        RecomendacionIa recomendacion = asistente("")
+                .analizar(CONTEXTO, new OpcionesAnalisis(null, null, "  clave-personal  "));
+
+        server.verify();
+        assertThat(recomendacion.resumen()).isEqualTo("Vas bien en press de banca.");
+    }
+
+    @Test
+    void unaClavePersonalRechazadaSeLeInformaAlUsuario() {
+        server.expect(requestTo(URL)).andRespond(withStatus(HttpStatus.FORBIDDEN));
+
+        assertThatThrownBy(() -> asistente(CLAVE)
+                .analizar(CONTEXTO, new OpcionesAnalisis(null, UnidadPeso.KG, "clave-mala")))
+                .isInstanceOf(IaNoDisponibleException.class)
+                .hasMessageContaining("clave configurada en tu perfil");
+    }
+
+    @Test
+    void elEnfoqueYLaUnidadVanEnElPromptPeroLaClaveNo() throws Exception {
+        server.expect(requestTo(URL))
+                .andExpect(jsonPath("$.contents[0].parts[0].text", Matchers.allOf(
+                        Matchers.containsString("Enfoque del usuario: FUERZA"),
+                        Matchers.containsString("expresa todas las cargas de tu respuesta en lb"),
+                        Matchers.not(Matchers.containsString("clave-personal")))))
+                .andRespond(withSuccess(respuestaCon(SALIDA_MODELO), MediaType.APPLICATION_JSON));
+
+        asistente(CLAVE).analizar(CONTEXTO, new OpcionesAnalisis(Enfoque.FUERZA, UnidadPeso.LB, "clave-personal"));
+
+        server.verify();
+    }
+
+    @Test
+    void sinEnfoqueElAnalisisEsGeneralEnKg() throws Exception {
+        server.expect(requestTo(URL))
+                .andExpect(jsonPath("$.contents[0].parts[0].text", Matchers.allOf(
+                        Matchers.containsString("Enfoque: general"),
+                        Matchers.containsString("Expresa las cargas en kg"))))
+                .andRespond(withSuccess(respuestaCon(SALIDA_MODELO), MediaType.APPLICATION_JSON));
+
+        asistente(CLAVE).analizar(CONTEXTO, OpcionesAnalisis.POR_DEFECTO);
+
+        server.verify();
+    }
+
+    @Test
+    void lasOpcionesNoImprimenLaClave() {
+        assertThat(new OpcionesAnalisis(Enfoque.HIPERTROFIA, UnidadPeso.KG, "secreta-123").toString())
+                .doesNotContain("secreta-123")
+                .contains("***");
     }
 }

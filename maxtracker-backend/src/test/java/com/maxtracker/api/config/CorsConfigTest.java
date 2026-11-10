@@ -44,6 +44,17 @@ class CorsConfigTest {
     }
 
     @Test
+    void preflightPermiteLaCabeceraDeLaClavePersonalDeGemini() throws Exception {
+        mockMvc.perform(options("/api/v1/analisis/rutina")
+                        .header(HttpHeaders.ORIGIN, "https://maxtracker.vercel.app")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "authorization,content-type,x-gemini-api-key"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS,
+                        org.hamcrest.Matchers.containsStringIgnoringCase("x-gemini-api-key")));
+    }
+
+    @Test
     void peticionDesdeOrigenPermitidoIncluyeCabeceraCors() throws Exception {
         given(ejercicioService.listar(0, 20, null)).willReturn(new PaginaDto<>(List.of(), 0, 20, 0, 0));
 

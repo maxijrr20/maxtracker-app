@@ -72,7 +72,7 @@ class AnalisisControllerTest {
 
     @Test
     void analizaUnaRutinaYDevuelveLasRecomendaciones() throws Exception {
-        given(analisisService.analizar(USUARIO_ID, new AnalisisRutinaRequest(3L, null, 14))).willReturn(ANALISIS);
+        given(analisisService.analizar(USUARIO_ID, new AnalisisRutinaRequest(3L, null, 14, null, null), null)).willReturn(ANALISIS);
 
         ejecutar(conJson("{\"rutinaId\": 3, \"dias\": 14}"))
                 .andExpect(status().isOk())
@@ -89,11 +89,11 @@ class AnalisisControllerTest {
 
     @Test
     void sinCuerpoAnalizaTodoElPeriodoPorDefecto() throws Exception {
-        given(analisisService.analizar(USUARIO_ID, AnalisisRutinaRequest.general())).willReturn(ANALISIS);
+        given(analisisService.analizar(USUARIO_ID, AnalisisRutinaRequest.general(), null)).willReturn(ANALISIS);
 
         ejecutar(post("/api/v1/analisis/rutina")).andExpect(status().isOk());
 
-        verify(analisisService).analizar(USUARIO_ID, AnalisisRutinaRequest.general());
+        verify(analisisService).analizar(USUARIO_ID, AnalisisRutinaRequest.general(), null);
     }
 
     @Test
@@ -111,8 +111,40 @@ class AnalisisControllerTest {
     }
 
     @Test
+    void pasaLaClavePersonalElEnfoqueYLaUnidad() throws Exception {
+        AnalisisRutinaRequest esperado = new AnalisisRutinaRequest(null, 9L, null,
+                com.maxtracker.api.service.ia.OpcionesAnalisis.Enfoque.FUERZA,
+                com.maxtracker.api.service.ia.OpcionesAnalisis.UnidadPeso.LB);
+        given(analisisService.analizar(USUARIO_ID, esperado, "AIza-clave_personal")).willReturn(ANALISIS);
+
+        ejecutar(conJson("{\"sesionId\": 9, \"enfoque\": \"FUERZA\", \"unidadPeso\": \"LB\"}")
+                .header("X-Gemini-Api-Key", "AIza-clave_personal"))
+                .andExpect(status().isOk());
+
+        verify(analisisService).analizar(USUARIO_ID, esperado, "AIza-clave_personal");
+    }
+
+    @Test
+    void rechazaUnaClaveConCaracteresInvalidosSinRepetirla() throws Exception {
+        ejecutar(conJson("{}").header("X-Gemini-Api-Key", "clave con espacios;"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("claveGemini: tiene caracteres no válidos"));
+
+        verifyNoInteractions(analisisService);
+    }
+
+    @Test
+    void rechazaUnEnfoqueDesconocido() throws Exception {
+        ejecutar(conJson("{\"enfoque\": \"CARDIO\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+
+        verifyNoInteractions(analisisService);
+    }
+
+    @Test
     void erroresDelServicioComoProblemDetail() throws Exception {
-        given(analisisService.analizar(eq(USUARIO_ID), any()))
+        given(analisisService.analizar(eq(USUARIO_ID), any(), any()))
                 .willThrow(RecursoNoEncontradoException.rutina(3))
                 .willThrow(new SinDatosParaAnalisisException(28))
                 .willThrow(new AnalisisDemasiadoFrecuenteException(Duration.ofSeconds(12)))

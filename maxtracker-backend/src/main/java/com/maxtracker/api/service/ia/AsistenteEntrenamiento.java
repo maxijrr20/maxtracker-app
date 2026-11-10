@@ -9,8 +9,10 @@ public interface AsistenteEntrenamiento {
     /**
      * Analiza el historial y devuelve recomendaciones.
      *
+     * @param opciones enfoque y unidad del análisis, y la clave personal del usuario si configuró una
      * @throws com.maxtracker.api.exception.IaNoDisponibleException si el proveedor no está configurado,
-     *                                                                falla, agota su cuota o no responde
+     *                                                                la clave es inválida, falla, agota su cuota
+     *                                                                o no responde
      */
-    RecomendacionIa analizar(ContextoAnalisis contexto);
+    RecomendacionIa analizar(ContextoAnalisis contexto, OpcionesAnalisis opciones);
 }

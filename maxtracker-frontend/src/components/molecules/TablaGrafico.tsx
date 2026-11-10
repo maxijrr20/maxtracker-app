@@ -13,15 +13,15 @@ export interface TablaGraficoProps {
  */
 export function TablaGrafico({ titulo, columnas, filas }: TablaGraficoProps) {
   return (
-    <details className="group rounded-xl border border-borde">
+    <details className="group rounded-xl border border-borde-vidrio bg-zinc-950/30">
       <summary className="flex min-h-tactil cursor-pointer list-none items-center justify-between gap-2 px-4 text-sm font-medium text-texto-suave hover:text-texto [&::-webkit-details-marker]:hidden">
         Ver como tabla
         <ChevronDown aria-hidden className="size-5 transition-transform group-open:rotate-180" />
       </summary>
-      <div className="max-h-72 overflow-auto border-t border-borde">
+      <div className="max-h-72 overflow-auto border-t border-borde-vidrio">
         <table className="w-full text-sm">
           <caption className="sr-only">{titulo}</caption>
-          <thead className="sticky top-0 bg-superficie text-left text-texto-suave">
+          <thead className="sticky top-0 bg-zinc-900 text-left text-texto-suave">
             <tr>
               {columnas.map((columna, i) => (
                 <th key={columna} scope="col" className={i === 0 ? 'px-4 py-2 font-medium' : 'px-4 py-2 text-right font-medium'}>
@@ -30,7 +30,7 @@ export function TablaGrafico({ titulo, columnas, filas }: TablaGraficoProps) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-borde">
+          <tbody className="divide-y divide-borde-vidrio font-mono">
             {filas.map((fila) => (
               <tr key={fila[0]}>
                 {fila.map((celda, i) =>

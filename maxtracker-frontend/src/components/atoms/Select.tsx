@@ -12,7 +12,7 @@ export function Select({ className, children, ...resto }: SelectHTMLAttributes<H
     <div className="relative">
       <select
         className={cx(
-          'min-h-tactil w-full appearance-none rounded-xl border border-borde bg-superficie py-2 pl-4 pr-11 text-base text-texto',
+          'min-h-tactil w-full appearance-none rounded-xl border border-borde-vidrio bg-zinc-900/60 py-2 pl-4 pr-11 text-base text-texto backdrop-blur-xl transition-all duration-200 hover:border-zinc-700',
           'focus:border-acento focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-acento/40',
           className,
         )}

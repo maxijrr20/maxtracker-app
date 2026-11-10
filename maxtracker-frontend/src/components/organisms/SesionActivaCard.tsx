@@ -2,12 +2,12 @@ import { Activity, Clock } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 
 import type { Sesion } from '../../api/types'
+import { usePeso } from '../../hooks/usePeso'
 import { Badge } from '../atoms/Badge'
 import { Card } from '../atoms/Card'
 import { Titulo } from '../atoms/Typography'
 
 const FORMATO_FECHA = new Intl.DateTimeFormat('es', { weekday: 'long', day: 'numeric', month: 'long' })
-const FORMATO_KG = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
 
 function duracion(desde: string, hasta: number): string {
   const minutos = Math.max(0, Math.floor((hasta - Date.parse(desde)) / 60_000))
@@ -25,6 +25,7 @@ export interface SesionActivaCardProps {
 
 /** Resumen de la sesión en curso: tiempo transcurrido, series y volumen total. */
 export function SesionActivaCard({ sesion, nombreRutina, accion }: SesionActivaCardProps) {
+  const { formato: formatoPeso } = usePeso()
   const [ahora, setAhora] = useState(() => Date.now())
 
   useEffect(() => {
@@ -39,10 +40,10 @@ export function SesionActivaCard({ sesion, nombreRutina, accion }: SesionActivaC
   const fecha = FORMATO_FECHA.format(new Date(`${sesion.fecha}T12:00:00`))
 
   return (
-    <Card className="flex flex-col gap-4 border-lime-400/30">
+    <Card tono={sesion.finalizada ? 'normal' : 'lima'} className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <Badge tono={sesion.finalizada ? 'neutro' : 'acento'} className="self-start">
+          <Badge tono={sesion.finalizada ? 'neutro' : 'lima'} className="self-start">
             <Activity aria-hidden className="size-4" />
             {sesion.finalizada ? 'Finalizada' : 'En curso'}
           </Badge>
@@ -54,19 +55,19 @@ export function SesionActivaCard({ sesion, nombreRutina, accion }: SesionActivaC
       </div>
 
       <dl className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-xl bg-superficie-alta p-3">
+        <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
           <dt className="flex items-center justify-center gap-1 text-xs text-texto-suave">
             <Clock aria-hidden className="size-3.5" /> Tiempo
           </dt>
-          <dd className="text-lg font-bold tabular-nums">{duracion(sesion.iniciadaEn, fin)}</dd>
+          <dd className="font-mono text-lg font-bold tabular-nums">{duracion(sesion.iniciadaEn, fin)}</dd>
         </div>
-        <div className="rounded-xl bg-superficie-alta p-3">
+        <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
           <dt className="text-xs text-texto-suave">Series</dt>
-          <dd className="text-lg font-bold tabular-nums">{sesion.series.length}</dd>
+          <dd className="font-mono text-lg font-bold tabular-nums">{sesion.series.length}</dd>
         </div>
-        <div className="rounded-xl bg-superficie-alta p-3">
+        <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
           <dt className="text-xs text-texto-suave">Volumen</dt>
-          <dd className="text-lg font-bold tabular-nums">{FORMATO_KG.format(volumen)} kg</dd>
+          <dd className="font-mono text-lg font-bold tabular-nums">{formatoPeso(volumen)}</dd>
         </div>
       </dl>
 

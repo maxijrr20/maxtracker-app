@@ -6,11 +6,13 @@ import { Button } from '../atoms/Button'
 import { Card } from '../atoms/Card'
 import { IconButton } from '../atoms/IconButton'
 
-const PRESETS_SEGUNDOS = [60, 90, 120, 180] as const
+const PRESETS_SEGUNDOS = [30, 60, 90, 120, 180] as const
 
 export interface DescansoTimerProps {
   /** Cambiar este valor (p. ej. al registrar una serie) reinicia el descanso con la duración elegida. */
   disparador?: number
+  /** Duración elegida al abrir (el descanso predeterminado del Perfil). */
+  duracionInicial?: number
 }
 
 function formatear(segundos: number): string {
@@ -23,8 +25,8 @@ function formatear(segundos: number): string {
  * Cronómetro de descanso entre series. Calcula el tiempo restante contra la hora de fin (no acumulando ticks),
  * así no se desfasa si el navegador frena los intervalos con la pantalla bloqueada. Vibra al terminar.
  */
-export function DescansoTimer({ disparador }: DescansoTimerProps) {
-  const [duracion, setDuracion] = useState<number>(90)
+export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTimerProps) {
+  const [duracion, setDuracion] = useState<number>(duracionInicial)
   const [finEn, setFinEn] = useState<number | null>(null)
   const [pausadoCon, setPausadoCon] = useState<number | null>(null)
   const [ahora, setAhora] = useState(() => Date.now())
@@ -97,14 +99,14 @@ export function DescansoTimer({ disparador }: DescansoTimerProps) {
         role="timer"
         aria-live={restante === 0 || !corriendo ? 'polite' : 'off'}
         className={cx(
-          'text-center text-6xl font-bold tabular-nums tracking-tight',
-          corriendo ? 'text-acento' : 'text-texto',
+          'text-center font-mono text-6xl font-bold tabular-nums tracking-tight transition-all duration-200',
+          corriendo ? 'text-acento drop-shadow-neon' : 'text-texto',
         )}
       >
         {formatear(restante)}
       </p>
 
-      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-4 gap-2">
+      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-5 gap-2">
         {PRESETS_SEGUNDOS.map((segundos) => (
           <button
             key={segundos}
@@ -112,10 +114,10 @@ export function DescansoTimer({ disparador }: DescansoTimerProps) {
             aria-pressed={duracion === segundos}
             onClick={() => elegir(segundos)}
             className={cx(
-              'min-h-tactil rounded-xl text-base font-semibold tabular-nums transition-colors',
+              'min-h-tactil rounded-xl border font-mono text-sm font-bold tabular-nums transition-all duration-200 active:scale-95',
               duracion === segundos
-                ? 'bg-acento text-sobre-acento'
-                : 'bg-superficie-alta text-texto hover:bg-zinc-700',
+                ? 'border-lime-300/70 bg-acento text-sobre-acento shadow-neon'
+                : 'border-borde-vidrio bg-zinc-800/70 text-texto hover:bg-zinc-700/70',
             )}
           >
             {formatear(segundos)}

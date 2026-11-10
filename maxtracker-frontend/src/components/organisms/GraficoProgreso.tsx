@@ -5,7 +5,8 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import type { EjercicioConHistorial, ProgresoEjercicio, PuntoProgreso } from '../../api/types'
 import { COLOR_GRAFICO } from '../../lib/coloresGrafico'
 import { cx } from '../../lib/cx'
-import { fechaCorta, formatoKg, formatoKgCompacto } from '../../lib/formato'
+import { usePeso } from '../../hooks/usePeso'
+import { fechaCorta } from '../../lib/formato'
 import { Card } from '../atoms/Card'
 import { Chip } from '../atoms/Chip'
 import { Select } from '../atoms/Select'
@@ -41,6 +42,7 @@ export interface GraficoProgresoProps {
  * Línea de 2 px con puntos de 8 px y anillo del color de la superficie; crosshair + tooltip; tabla equivalente.
  */
 export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, progreso, cargando, error }: GraficoProgresoProps) {
+  const { formato: formatoPeso, formatoCompacto: formatoPesoCompacto } = usePeso()
   const [medida, setMedida] = useState<Medida>('pesoMaxKg')
   const idSelect = useId()
   const puntos = progreso?.puntos ?? []
@@ -93,13 +95,13 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
           {/* Cifras clave como texto: el último valor y el mejor (la "etiqueta directa" de la línea). */}
           {ultimo && mejor && (
             <dl className="grid grid-cols-2 gap-2">
-              <div className="rounded-xl bg-superficie-alta p-3">
+              <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
                 <dt className="text-xs text-texto-suave">Última sesión · {fechaCorta(ultimo.fecha)}</dt>
-                <dd className="text-xl font-semibold">{formatoKg(ultimo[medida])}</dd>
+                <dd className="font-mono text-xl font-bold">{formatoPeso(ultimo[medida])}</dd>
               </div>
-              <div className="rounded-xl bg-superficie-alta p-3">
+              <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
                 <dt className="text-xs text-texto-suave">Mejor · {fechaCorta(mejor.fecha)}</dt>
-                <dd className="text-xl font-semibold">{formatoKg(mejor[medida])}</dd>
+                <dd className="font-mono text-xl font-bold">{formatoPeso(mejor[medida])}</dd>
               </div>
             </dl>
           )}
@@ -129,7 +131,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                   />
                   <YAxis
                     domain={medida === 'volumenKg' ? [0, 'auto'] : ['auto', 'auto']}
-                    tickFormatter={formatoKgCompacto}
+                    tickFormatter={formatoPesoCompacto}
                     tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
@@ -142,7 +144,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                       return (
                         <TooltipGrafico
                           activo={active}
-                          valor={punto ? formatoKg(punto[medida]) : undefined}
+                          valor={punto ? formatoPeso(punto[medida]) : undefined}
                           etiqueta={punto ? fechaCorta(punto.fecha) : undefined}
                           serie={MEDIDAS[medida].serie}
                           detalle={punto ? `${punto.series} ${punto.series === 1 ? 'serie' : 'series'}` : undefined}
@@ -174,9 +176,9 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
               columnas={['Fecha', 'Peso máx.', '1RM est.', 'Volumen']}
               filas={puntos.map((p) => [
                 fechaCorta(p.fecha) + (puntos.filter((q) => q.fecha === p.fecha).length > 1 ? ` (#${p.sesionId})` : ''),
-                formatoKg(p.pesoMaxKg),
-                formatoKg(p.unoRmEstimadoKg),
-                formatoKg(p.volumenKg),
+                formatoPeso(p.pesoMaxKg),
+                formatoPeso(p.unoRmEstimadoKg),
+                formatoPeso(p.volumenKg),
               ])}
             />
           )}

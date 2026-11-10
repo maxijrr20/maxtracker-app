@@ -18,7 +18,7 @@ export interface TooltipGraficoProps {
 export function TooltipGrafico({ activo, valor, etiqueta, serie, detalle }: TooltipGraficoProps) {
   if (!activo || valor === undefined) return null
   return (
-    <div className="rounded-xl border border-borde bg-superficie-alta px-3 py-2 shadow-lg shadow-black/40">
+    <div className="rounded-xl border border-borde-vidrio bg-zinc-900/90 px-3 py-2 shadow-2xl shadow-black/50 backdrop-blur-xl">
       {etiqueta && <p className="text-xs text-texto-suave">{etiqueta}</p>}
       <p className="flex items-center gap-2">
         <span aria-hidden className="h-0.5 w-3 rounded-full" style={{ backgroundColor: COLOR_GRAFICO.marca }} />

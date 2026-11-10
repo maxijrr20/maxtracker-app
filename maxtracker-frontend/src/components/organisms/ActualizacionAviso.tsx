@@ -26,7 +26,7 @@ export function ActualizacionAviso() {
     <div
       role="status"
       // Sobre la barra inferior en móvil; abajo a la derecha desde md.
-      className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-borde bg-superficie-alta p-3 pl-4 shadow-xl shadow-black/50 md:inset-x-auto md:bottom-6 md:right-6"
+      className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-center gap-3 vidrio rounded-2xl border border-borde-vidrio p-3 pl-4 shadow-2xl shadow-black/50 md:inset-x-auto md:bottom-6 md:right-6"
     >
       {hayVersionNueva ? (
         <>

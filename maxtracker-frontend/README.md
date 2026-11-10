@@ -58,6 +58,18 @@ El backend (`GET /ejercicios`) pagina y filtra por categoría de wger, pero **no
 - `TarjetaAnalisisIa` pide `POST /analisis/rutina` **a demanda** en el detalle de una rutina, y automáticamente al
   finalizar una sesión con series. La clave de Gemini vive solo en el backend.
 
+## Perfil y preferencias
+
+`/perfil` (avatar de la cabecera o pestaña "Perfil") guarda en este dispositivo (`src/preferencias/`, localStorage):
+
+- **Unidad de peso** kg / lb: solo presentación e ingreso. Los datos viajan y se guardan siempre en kg (`usePeso()`
+  convierte); si no tocas el peso precargado, se reenvía el valor exacto en kg para no acumular redondeos.
+- **Descanso predeterminado** (30–120 s) con el que arranca el cronómetro.
+- **Zona horaria** (automática o una IANA): define el "hoy" que se envía como `fecha` al empezar un entrenamiento.
+- **Entrenador IA:** enfoque (Fuerza / Hipertrofia / Mantenimiento) y una clave personal de Gemini opcional. La
+  clave se guarda solo en el dispositivo, viaja únicamente en `POST /analisis/rutina` (cabecera `X-Gemini-Api-Key`),
+  nunca se vuelve a mostrar completa y se borra al cerrar sesión.
+
 ## Entrenamiento libre
 
 `/entrenamiento` sin sesión en curso permite empezar sin rutina y agregar ejercicios con el buscador. El backend solo

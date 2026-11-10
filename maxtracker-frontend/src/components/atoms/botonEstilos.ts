@@ -4,10 +4,15 @@ export type VarianteBoton = 'primario' | 'secundario' | 'fantasma' | 'peligro'
 export type TamanoBoton = 'md' | 'lg'
 
 const VARIANTES: Record<VarianteBoton, string> = {
-  primario: 'bg-acento text-sobre-acento hover:bg-acento-hover active:bg-acento',
-  secundario: 'bg-superficie-alta text-texto hover:bg-zinc-700 active:bg-zinc-800',
-  fantasma: 'bg-transparent text-texto hover:bg-superficie-alta active:bg-superficie',
-  peligro: 'bg-red-500/15 text-peligro hover:bg-red-500/25 active:bg-red-500/15',
+  // Acción principal: lima con resplandor neón suave y borde más claro (canto de luz); se intensifica al pasar.
+  primario:
+    'border border-lime-300/70 bg-acento font-bold tracking-wide text-sobre-acento shadow-neon ' +
+    'hover:bg-acento-hover hover:shadow-neon-fuerte',
+  secundario:
+    'border border-borde-vidrio bg-zinc-800/70 font-semibold text-texto backdrop-blur-xl ' +
+    'hover:border-zinc-700 hover:bg-zinc-700/70',
+  fantasma: 'border border-transparent bg-transparent font-semibold text-texto hover:bg-white/5',
+  peligro: 'border border-red-500/25 bg-red-500/10 font-semibold text-peligro hover:bg-red-500/20',
 }
 
 /** md = 48 px de alto (mínimo táctil); lg = 56 px para la acción principal de la pantalla. */
@@ -19,8 +24,9 @@ const TAMANOS: Record<TamanoBoton, string> = {
 /** Clases compartidas por Button y ButtonLink, para que un enlace "acción" se vea igual que un botón. */
 export function clasesBoton(variante: VarianteBoton, tamano: TamanoBoton, anchoCompleto: boolean): string {
   return cx(
-    'inline-flex min-w-tactil select-none items-center justify-center gap-2 rounded-xl font-semibold',
-    'transition-colors duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50',
+    'inline-flex min-w-tactil select-none items-center justify-center gap-2 rounded-xl',
+    // Respuesta táctil: se hunde al tocar; el resto de transiciones duran 200 ms.
+    'transition-all duration-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none',
     VARIANTES[variante],
     TAMANOS[tamano],
     anchoCompleto && 'w-full',

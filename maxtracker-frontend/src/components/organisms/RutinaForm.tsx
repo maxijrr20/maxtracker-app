@@ -154,7 +154,7 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
               <li key={item.clave}>
                 <Card className="flex flex-col gap-3">
                   <div className="flex items-start gap-2">
-                    <span className="grid size-tactil shrink-0 place-items-center rounded-xl bg-superficie-alta font-bold text-acento">
+                    <span className="grid size-tactil shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 font-mono text-lg font-bold text-acento">
                       {indice + 1}
                     </span>
                     <div className="flex min-w-0 flex-1 flex-col pt-1">

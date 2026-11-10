@@ -14,7 +14,8 @@ import { StatTile } from '../components/molecules/StatTile'
 import { RecordsList } from '../components/organisms/RecordsList'
 import { SesionActivaCard } from '../components/organisms/SesionActivaCard'
 import { useCarga } from '../hooks/useCarga'
-import { formatoKg, variacionPorcentual } from '../lib/formato'
+import { usePeso } from '../hooks/usePeso'
+import { variacionPorcentual } from '../lib/formato'
 
 const SEMANAS = 12
 
@@ -31,6 +32,7 @@ function detallePeriodo(sesiones: number, series: number): string {
 }
 
 export function DashboardPage() {
+  const { formato: formatoPeso } = usePeso()
   const { email } = useAuth()
   const { datos, cargando, error, recargar } = useCarga(async (signal) => {
     const [enCurso, resumen, ejercicios] = await Promise.all([
@@ -106,7 +108,7 @@ export function DashboardPage() {
             <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
               <StatTile
                 etiqueta="Volumen esta semana"
-                valor={formatoKg(datos.resumen.semanaActual.volumenKg)}
+                valor={formatoPeso(datos.resumen.semanaActual.volumenKg)}
                 variacion={variacionPorcentual(
                   datos.resumen.semanaActual.volumenKg,
                   datos.resumen.semanaAnterior.volumenKg,
@@ -116,7 +118,7 @@ export function DashboardPage() {
               />
               <StatTile
                 etiqueta="Volumen este mes"
-                valor={formatoKg(datos.resumen.mesActual.volumenKg)}
+                valor={formatoPeso(datos.resumen.mesActual.volumenKg)}
                 variacion={variacionPorcentual(datos.resumen.mesActual.volumenKg, datos.resumen.mesAnterior.volumenKg)}
                 referencia="vs. mes anterior"
                 detalle={detallePeriodo(datos.resumen.mesActual.sesiones, datos.resumen.mesActual.series)}

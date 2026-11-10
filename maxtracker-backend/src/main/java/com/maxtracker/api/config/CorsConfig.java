@@ -25,8 +25,9 @@ public class CorsConfig implements WebMvcConfigurer {
                         .filter(origen -> !origen.isEmpty())
                         .toArray(String[]::new))
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT)
-                .exposedHeaders(HttpHeaders.LOCATION)
+                .allowedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT,
+                        CabecerasApi.CLAVE_GEMINI)
+                .exposedHeaders(HttpHeaders.LOCATION, HttpHeaders.RETRY_AFTER)
                 .maxAge(3600);
     }
 }

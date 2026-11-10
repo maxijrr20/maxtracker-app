@@ -2,12 +2,23 @@
 
 /*
  * Tokens de diseño (ver la skill ui-ux-designer). Modo oscuro por defecto: la app no tiene tema claro.
- * Se usan como utilidades de Tailwind: bg-fondo, bg-superficie, text-acento, border-borde, etc.
+ * Se usan como utilidades de Tailwind: bg-fondo, bg-vidrio, text-acento, border-borde-vidrio, shadow-neon, etc.
  */
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Cifras de entrenamiento (peso, series, tiempo): monoespaciada, se alinean y se leen de un vistazo. */
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 
+  /* Profundidad: degradado de zinc-900 (arriba) a negro (abajo); ver body::before. */
   --color-fondo: var(--color-zinc-950);
+  --color-fondo-arriba: var(--color-zinc-900);
+  --color-fondo-abajo: #000;
+
+  /* Vidrio (glassmorphism): tarjetas, barras y hojas. Siempre con backdrop-blur-xl. */
+  --color-vidrio: color-mix(in oklab, var(--color-zinc-900) 70%, transparent);
+  --color-vidrio-barra: color-mix(in oklab, var(--color-zinc-950) 75%, transparent);
+  --color-borde-vidrio: color-mix(in oklab, var(--color-zinc-800) 80%, transparent);
+
   --color-superficie: var(--color-zinc-900);
   --color-superficie-alta: var(--color-zinc-800);
   --color-borde: var(--color-zinc-800);
@@ -18,6 +29,11 @@
   --color-acento: var(--color-lime-400);
   --color-acento-hover: var(--color-lime-300);
   --color-sobre-acento: var(--color-zinc-950);
+
+  /* Resplandor neón del lima: acción principal, ruta activa, cifras clave. */
+  --shadow-neon: 0 0 20px rgb(163 230 53 / 0.2);
+  --shadow-neon-fuerte: 0 0 28px rgb(163 230 53 / 0.35);
+  --drop-shadow-neon: 0 0 6px rgb(163 230 53 / 0.55);
 
   /*
    * Gráficos. La marca de datos es lime-600 (no el lima-400 de la UI): validado con el script de la skill dataviz
@@ -51,10 +67,30 @@
     overscroll-behavior-y: none;
   }
 
+  /*
+   * Fondo con profundidad: degradado fijo detrás de todo (un pseudo-elemento fijo en lugar de
+   * background-attachment: fixed, que iOS ignora) y un halo lima muy tenue arriba.
+   */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgb(163 230 53 / 0.07), transparent 60%),
+      linear-gradient(to bottom, var(--color-fondo-arriba) 0%, var(--color-fondo) 45%, var(--color-fondo-abajo) 100%);
+  }
+
   /* Foco visible y grueso para navegar con teclado o lector de pantalla. */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-acento;
   }
+}
+
+/* Superficie de vidrio: la base de Card, Sheet y las barras de navegación. */
+@utility vidrio {
+  @apply bg-vidrio backdrop-blur-xl;
 }
 
 /* Respeta "reducir movimiento" del sistema operativo. */

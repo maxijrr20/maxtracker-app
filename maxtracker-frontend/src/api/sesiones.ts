@@ -21,7 +21,10 @@ export async function buscarSesionEnCurso(signal?: AbortSignal): Promise<Sesion 
   return enCurso ? obtenerSesion(enCurso.id, signal) : null
 }
 
-export async function iniciarSesion(datos: { rutinaId?: number; notas?: string } = {}): Promise<Sesion> {
+/** {@code fecha} (YYYY-MM-DD): el "hoy" en la zona horaria del usuario; sin ella el backend usa la del servidor. */
+export async function iniciarSesion(
+  datos: { rutinaId?: number; notas?: string; fecha?: string } = {},
+): Promise<Sesion> {
   const { data } = await http.post<Sesion>('/sesiones', datos)
   return data
 }

@@ -60,7 +60,7 @@ export function RutinasPage() {
               {/* Toda la tarjeta es el área táctil. */}
               <Link
                 to={`/rutinas/${rutina.id}`}
-                className="flex min-h-16 items-center gap-3 rounded-2xl border border-borde bg-superficie p-4 transition-colors hover:border-zinc-700 active:bg-superficie-alta"
+                className="vidrio flex min-h-16 items-center gap-3 rounded-2xl border border-borde-vidrio p-4 shadow-2xl shadow-black/40 transition-all duration-200 hover:border-lime-500/30 active:scale-[0.98]"
               >
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="break-words text-lg font-semibold">{rutina.nombre}</span>
