@@ -16,6 +16,8 @@ export interface RegistrarSerieFormProps {
   pesoInicial?: number
   repeticionesIniciales?: number
   onRegistrar: (serie: RegistrarSerieRequest) => Promise<void>
+  /** Ejercicio actual de la sesión: su botón es la acción primaria (lima); el resto, secundario. */
+  destacado?: boolean
 }
 
 /** Acepta coma o punto decimal (teclados en español). */
@@ -29,7 +31,13 @@ const FORMATO_LIMITE = new Intl.NumberFormat('es', { maximumFractionDigits: 1 })
  * Peso / repeticiones / RIR con las mismas reglas que RegistrarSerieRequest del backend. El peso se escribe en la
  * unidad elegida en Perfil y se envía en kg.
  */
-export function RegistrarSerieForm({ ejercicio, pesoInicial, repeticionesIniciales, onRegistrar }: RegistrarSerieFormProps) {
+export function RegistrarSerieForm({
+  ejercicio,
+  pesoInicial,
+  repeticionesIniciales,
+  onRegistrar,
+  destacado = false,
+}: RegistrarSerieFormProps) {
   const pesoUnidad = usePeso()
   const textoInicial = pesoInicial === undefined ? '' : pesoUnidad.valorEditable(pesoInicial)
   const [peso, setPeso] = useState(textoInicial)
@@ -80,12 +88,12 @@ export function RegistrarSerieForm({ ejercicio, pesoInicial, repeticionesInicial
           inputMode="decimal"
           value={peso}
           onChange={(e) => setPeso(e.target.value)}
-          className="font-mono"
+          className="font-mono font-bold"
         />
-        <FormField etiqueta="Reps" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} className="font-mono" />
-        <FormField etiqueta="RIR" inputMode="numeric" placeholder="–" value={rir} onChange={(e) => setRir(e.target.value)} className="font-mono" />
+        <FormField etiqueta="Reps" inputMode="numeric" value={reps} onChange={(e) => setReps(e.target.value)} className="font-mono font-bold" />
+        <FormField etiqueta="RIR" inputMode="numeric" placeholder="–" value={rir} onChange={(e) => setRir(e.target.value)} className="font-mono font-bold" />
       </div>
-      <Button type="submit" anchoCompleto icono={Plus} cargando={enviando}>
+      <Button type="submit" variante={destacado ? 'primario' : 'secundario'} anchoCompleto icono={Plus} cargando={enviando}>
         Registrar serie
       </Button>
     </form>

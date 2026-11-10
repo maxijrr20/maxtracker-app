@@ -6,17 +6,21 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   activo: boolean
 }
 
-/** Filtro alternable (p. ej. grupo muscular). 48 px de alto; el estado se anuncia con aria-pressed. */
+/**
+ * Filtro alternable (p. ej. grupo muscular). 48 px de alto; el estado se anuncia con aria-pressed.
+ * Activo en blanco (no lima: un filtro no es un punto de foco).
+ */
 export function Chip({ activo, className, type = 'button', ...resto }: ChipProps) {
   return (
     <button
       type={type}
       aria-pressed={activo}
       className={cx(
-        'inline-flex min-h-tactil shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-all duration-200 active:scale-95',
+        'inline-flex min-h-tactil shrink-0 items-center rounded-full px-4 text-sm font-semibold',
+        'transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
         activo
-          ? 'border-lime-300/70 bg-acento text-sobre-acento shadow-neon'
-          : 'border-borde-vidrio bg-zinc-900/60 text-texto hover:border-zinc-700 hover:bg-zinc-800/70',
+          ? 'bg-zinc-100 text-zinc-950'
+          : 'bg-white/[0.04] text-texto-suave ring-1 ring-inset ring-white/10 hover:bg-white/[0.08] hover:text-texto',
         className,
       )}
       {...resto}

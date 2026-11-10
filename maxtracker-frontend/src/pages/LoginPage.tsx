@@ -20,7 +20,7 @@ export function LoginPage() {
       <Texto suave className="text-center">
         ¿No tienes cuenta?{' '}
         {/* Conserva el destino original (state.desde) al cambiar de formulario. */}
-        <Link to="/register" state={ubicacion.state} className="inline-flex min-h-tactil items-center font-semibold text-acento underline-offset-4 hover:underline">
+        <Link to="/register" state={ubicacion.state} className="inline-flex min-h-tactil items-center font-semibold text-texto underline underline-offset-4 hover:text-acento">
           Crear cuenta
         </Link>
       </Texto>

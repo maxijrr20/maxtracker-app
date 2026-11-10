@@ -7,7 +7,6 @@ import { aFecha, fechaCorta } from '../../lib/formato'
 import { Badge } from '../atoms/Badge'
 import { Button } from '../atoms/Button'
 import { Card } from '../atoms/Card'
-import { Titulo } from '../atoms/Typography'
 import { EmptyState } from '../molecules/EmptyState'
 
 const VISIBLES = 5
@@ -26,8 +25,8 @@ export function RecordsList({ records }: RecordsListProps) {
   const visibles = todos ? records : records.slice(0, VISIBLES)
 
   return (
-    <Card className="flex flex-col gap-3">
-      <Titulo nivel={2}>Récords personales</Titulo>
+    <Card className="flex flex-col gap-2">
+      <h2 className="rotulo">Récords personales</h2>
 
       {records.length === 0 ? (
         <EmptyState
@@ -37,27 +36,35 @@ export function RecordsList({ records }: RecordsListProps) {
         />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-borde-vidrio">
-            {visibles.map((record) => (
-              <li key={record.ejercicioId} className="flex min-h-16 items-center gap-3 py-2">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 text-acento">
-                  <Trophy aria-hidden className="size-5" />
-                </span>
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="flex flex-wrap items-center gap-2 font-semibold">
-                    <span className="break-words">{record.ejercicioNombre}</span>
-                    {aFecha(record.fecha).getTime() >= limiteNuevo && <Badge tono="exito">Nuevo</Badge>}
+          <ul className="flex flex-col divide-y divide-zinc-800/60">
+            {visibles.map((record) => {
+              // PR reciente = punto de foco (lima); los demás récords, en neutro.
+              const reciente = aFecha(record.fecha).getTime() >= limiteNuevo
+              return (
+                <li key={record.ejercicioId} className="flex min-h-14 items-center gap-3 py-1.5">
+                  <Trophy aria-hidden className={reciente ? 'size-5 shrink-0 text-acento' : 'size-5 shrink-0 text-zinc-600'} />
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-semibold">{record.ejercicioNombre}</span>
+                      {reciente && (
+                        <Badge tono="acento" mono>
+                          PR
+                        </Badge>
+                      )}
+                    </span>
+                    <span className="font-mono text-xs text-texto-suave">
+                      {fechaCorta(record.fecha)} · 1RM {formatoPeso(record.unoRmEstimadoKg)}
+                    </span>
+                  </div>
+                  <span className="shrink-0 text-right">
+                    <span className={reciente ? 'cifra block text-xl text-acento' : 'cifra block text-xl text-texto'}>
+                      {formatoPeso(record.pesoMaxKg)}
+                    </span>
+                    <span className="block font-mono text-xs font-bold text-zinc-500">×{record.repeticiones}</span>
                   </span>
-                  <span className="text-sm text-texto-suave">
-                    {fechaCorta(record.fecha)} · 1RM est. {formatoPeso(record.unoRmEstimadoKg)}
-                  </span>
-                </div>
-                <span className="shrink-0 text-right">
-                  <span className="block font-mono text-lg font-bold tabular-nums text-acento">{formatoPeso(record.pesoMaxKg)}</span>
-                  <span className="block text-sm tabular-nums text-texto-suave">× {record.repeticiones} reps</span>
-                </span>
-              </li>
-            ))}
+                </li>
+              )
+            })}
           </ul>
           {records.length > VISIBLES && (
             <Button variante="fantasma" anchoCompleto onClick={() => setTodos((t) => !t)} aria-expanded={todos}>

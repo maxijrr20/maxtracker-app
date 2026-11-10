@@ -37,7 +37,7 @@ export default defineConfig({
       workbox: {
         // Precachea el "app shell": la app abre sin conexión. Las llamadas a la API (otro origen)
         // no se cachean: los datos de entrenamiento siempre van a la red.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
       },

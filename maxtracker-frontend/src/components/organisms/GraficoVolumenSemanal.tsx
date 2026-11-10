@@ -1,11 +1,10 @@
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 import type { VolumenSemanal } from '../../api/types'
-import { COLOR_GRAFICO } from '../../lib/coloresGrafico'
+import { COLOR_GRAFICO, FUENTE_MONO } from '../../lib/coloresGrafico'
 import { usePeso } from '../../hooks/usePeso'
 import { fechaCorta } from '../../lib/formato'
 import { Card } from '../atoms/Card'
-import { Titulo } from '../atoms/Typography'
 import { TablaGrafico } from '../molecules/TablaGrafico'
 import { TooltipGrafico } from '../molecules/TooltipGrafico'
 
@@ -28,20 +27,21 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
   }))
 
   return (
-    <Card className="flex flex-col gap-3">
-      <div>
-        <Titulo nivel={2}>Volumen por semana</Titulo>
-        <p className="text-sm text-texto-suave">Peso × repeticiones de todas tus series, últimas {semanas.length} semanas.</p>
+    <Card className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="rotulo">Volumen por semana</h2>
+        <span className="text-xs text-zinc-500">Peso × reps · {semanas.length} sem.</span>
       </div>
 
-      <div className="h-56" role="img" aria-label={`Gráfico de volumen semanal de las últimas ${semanas.length} semanas`}>
+      {/* Marcas en gris; la semana actual (foco) en lima. */}
+      <div className="h-44" role="img" aria-label={`Gráfico de volumen semanal de las últimas ${semanas.length} semanas`}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={datos} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap={2}>
             <CartesianGrid vertical={false} stroke={COLOR_GRAFICO.rejilla} />
             <XAxis
               dataKey="semana"
               tickFormatter={(valor: string) => valor.replace('Sem. ', '')}
-              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 11, fontFamily: FUENTE_MONO }}
               axisLine={false}
               tickLine={false}
               interval="preserveStartEnd"
@@ -49,7 +49,7 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
             />
             <YAxis
               tickFormatter={formatoPesoCompacto}
-              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 11, fontFamily: FUENTE_MONO }}
               axisLine={false}
               tickLine={false}
               width={44}
@@ -77,7 +77,11 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
               radius={[4, 4, 0, 0]}
               maxBarSize={24}
               isAnimationActive={false}
-            />
+            >
+              {datos.map((punto, i) => (
+                <Cell key={punto.semana} fill={i === datos.length - 1 ? COLOR_GRAFICO.foco : COLOR_GRAFICO.marca} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

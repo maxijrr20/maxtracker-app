@@ -30,9 +30,9 @@ export function ContadorField({ etiqueta, valor, min, max, porDefecto, paso = 1,
       <span id={idEtiqueta} className="text-sm font-medium text-texto-suave">
         {etiqueta}
       </span>
-      <div className="flex items-center justify-between gap-1 rounded-xl border border-borde-vidrio bg-zinc-900/60 backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80">
         <IconButton icono={Minus} etiqueta={`Restar ${etiqueta.toLowerCase()}`} onClick={restar} disabled={valor === null} />
-        <output aria-live="polite" className="min-w-10 text-center font-mono text-xl font-bold tabular-nums text-acento">
+        <output aria-live="polite" className="cifra min-w-10 text-center text-2xl text-texto">
           {valor ?? '–'}
         </output>
         <IconButton icono={Plus} etiqueta={`Sumar ${etiqueta.toLowerCase()}`} onClick={sumar} disabled={valor === max} />

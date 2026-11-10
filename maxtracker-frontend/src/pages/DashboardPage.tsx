@@ -8,7 +8,7 @@ import { Button } from '../components/atoms/Button'
 import { ButtonLink } from '../components/atoms/ButtonLink'
 import { Card } from '../components/atoms/Card'
 import { Spinner } from '../components/atoms/Spinner'
-import { Texto, Titulo } from '../components/atoms/Typography'
+import { Titulo } from '../components/atoms/Typography'
 import { Alert } from '../components/molecules/Alert'
 import { StatTile } from '../components/molecules/StatTile'
 import { RecordsList } from '../components/organisms/RecordsList'
@@ -19,6 +19,9 @@ import { variacionPorcentual } from '../lib/formato'
 
 const SEMANAS = 12
 
+const FORMATO_ENTERO = new Intl.NumberFormat('es', { maximumFractionDigits: 0 })
+const formatoEntero = (valor: number) => FORMATO_ENTERO.format(valor)
+
 // recharts pesa ~400 kB: se carga aparte, solo cuando se muestran los gráficos (el resto de la app no lo descarga).
 const GraficoVolumenSemanal = lazy(() =>
   import('../components/organisms/GraficoVolumenSemanal').then((m) => ({ default: m.GraficoVolumenSemanal })),
@@ -28,11 +31,11 @@ const GraficoProgreso = lazy(() =>
 )
 
 function detallePeriodo(sesiones: number, series: number): string {
-  return `${sesiones} ${sesiones === 1 ? 'sesión' : 'sesiones'} · ${series} series`
+  return `${sesiones} ses. · ${series} series`
 }
 
 export function DashboardPage() {
-  const { formato: formatoPeso } = usePeso()
+  const { desdeKg, unidad } = usePeso()
   const { email } = useAuth()
   const { datos, cargando, error, recargar } = useCarga(async (signal) => {
     const [enCurso, resumen, ejercicios] = await Promise.all([
@@ -55,9 +58,9 @@ export function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
+        <span className="rotulo">Tu progreso</span>
         <Titulo>Hola{nombre ? `, ${nombre}` : ''}</Titulo>
-        <Texto suave>Tu progreso de un vistazo.</Texto>
       </div>
 
       {cargando && !datos && <Spinner etiqueta="Cargando tus métricas…" />}
@@ -83,16 +86,12 @@ export function DashboardPage() {
               }
             />
           ) : (
-            <Card className="flex flex-col gap-4">
+            <Card className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-tactil place-items-center rounded-xl bg-acento text-sobre-acento">
-                  <Dumbbell aria-hidden className="size-6" />
-                </span>
-                <div>
-                  <Titulo nivel={2}>¿Listo para entrenar?</Titulo>
-                  <Texto suave tamano="sm">
-                    Elige una rutina o empieza un entrenamiento libre.
-                  </Texto>
+                <Dumbbell aria-hidden className="size-5 shrink-0 text-zinc-500" />
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold leading-tight">¿Listo para entrenar?</h2>
+                  <p className="text-sm text-texto-suave">Elige una rutina o entrena libre.</p>
                 </div>
               </div>
               <ButtonLink to="/entrenamiento" tamano="lg" anchoCompleto icono={ListChecks}>
@@ -101,34 +100,36 @@ export function DashboardPage() {
             </Card>
           )}
 
-          <section aria-labelledby="titulo-volumen" className="flex flex-col gap-3">
+          {/* Volumen del periodo: dos cifras en una sola superficie, con divisor. */}
+          <Card className="flex flex-col gap-2 px-0">
             <h2 id="titulo-volumen" className="sr-only">
               Volumen de entrenamiento
             </h2>
-            <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
+            <div className="grid grid-cols-2 divide-x divide-zinc-800/60">
               <StatTile
-                etiqueta="Volumen esta semana"
-                valor={formatoPeso(datos.resumen.semanaActual.volumenKg)}
+                etiqueta="Semana"
+                valor={formatoEntero(desdeKg(datos.resumen.semanaActual.volumenKg))}
+                unidad={unidad}
                 variacion={variacionPorcentual(
                   datos.resumen.semanaActual.volumenKg,
                   datos.resumen.semanaAnterior.volumenKg,
                 )}
-                referencia="vs. semana anterior"
+                referencia="frente a la semana anterior"
                 detalle={detallePeriodo(datos.resumen.semanaActual.sesiones, datos.resumen.semanaActual.series)}
               />
               <StatTile
-                etiqueta="Volumen este mes"
-                valor={formatoPeso(datos.resumen.mesActual.volumenKg)}
+                etiqueta="Mes"
+                valor={formatoEntero(desdeKg(datos.resumen.mesActual.volumenKg))}
+                unidad={unidad}
                 variacion={variacionPorcentual(datos.resumen.mesActual.volumenKg, datos.resumen.mesAnterior.volumenKg)}
-                referencia="vs. mes anterior"
+                referencia="frente al mes anterior"
                 detalle={detallePeriodo(datos.resumen.mesActual.sesiones, datos.resumen.mesActual.series)}
               />
             </div>
-            <p className="text-xs text-texto-suave">
-              Volumen = peso × repeticiones. Compara periodos en curso con periodos completos: al inicio de la
-              semana o del mes es normal que salga más bajo.
+            <p className="px-3 text-xs text-zinc-500">
+              Volumen = peso × reps. Los periodos en curso se comparan con periodos completos.
             </p>
-          </section>
+          </Card>
 
           <Suspense fallback={<Spinner etiqueta="Cargando gráficos…" />}>
             <GraficoVolumenSemanal semanas={datos.resumen.volumenSemanal} />

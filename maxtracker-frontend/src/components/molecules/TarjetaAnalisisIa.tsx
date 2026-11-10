@@ -38,7 +38,7 @@ export function TarjetaAnalisisIa({
   textoBoton = 'Analizar con IA',
 }: TarjetaAnalisisIaProps) {
   return (
-    <Card tono="ia" className="flex flex-col gap-4" aria-busy={cargando || undefined}>
+    <Card className="flex flex-col gap-3" aria-busy={cargando || undefined}>
       <div className="flex items-start gap-3">
         <span className="grid size-tactil shrink-0 place-items-center rounded-xl bg-sky-400/15 text-sky-200">
           <Sparkles aria-hidden className="size-6" />
@@ -64,12 +64,12 @@ export function TarjetaAnalisisIa({
 
           {analisis.ejercicios.length > 0 && (
             <section aria-label="Sobrecarga progresiva por ejercicio" className="flex flex-col gap-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-texto-suave">Sobrecarga progresiva</h3>
+              <h3 className="rotulo">Sobrecarga progresiva</h3>
               <ul className="flex flex-col gap-2">
                 {analisis.ejercicios.map((e, i) => {
                   const t = TENDENCIAS[e.tendencia] ?? TENDENCIAS.SIN_DATOS_SUFICIENTES
                   return (
-                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-xl border border-white/5 bg-zinc-950/40 p-3">
+                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-xl bg-white/[0.03] px-3 py-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-semibold">{e.ejercicio}</span>
                         <Badge tono={t.tono}>
@@ -88,14 +88,14 @@ export function TarjetaAnalisisIa({
 
           {analisis.ajusteRir && (
             <section aria-label="Ajuste de RIR" className="flex flex-col gap-1">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-texto-suave">Ajuste de RIR</h3>
+              <h3 className="rotulo">Ajuste de RIR</h3>
               <p className="text-sm">{analisis.ajusteRir}</p>
             </section>
           )}
 
           {analisis.sugerencias.length > 0 && (
             <section aria-label="Sugerencias" className="flex flex-col gap-1">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-texto-suave">Sugerencias</h3>
+              <h3 className="rotulo">Sugerencias</h3>
               <ul className="flex list-disc flex-col gap-1 pl-5 text-sm marker:text-sky-300">
                 {analisis.sugerencias.map((s, i) => (
                   <li key={i}>{s}</li>

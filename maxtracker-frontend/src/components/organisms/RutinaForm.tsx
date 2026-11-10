@@ -113,8 +113,8 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
 
   return (
     <>
-    <form onSubmit={enviar} noValidate className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4">
+    <form onSubmit={enviar} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <FormField
           etiqueta="Nombre"
           placeholder="Ej.: Empuje, Pierna A…"
@@ -134,10 +134,10 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
 
       <section aria-labelledby="titulo-ejercicios-rutina" className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 id="titulo-ejercicios-rutina" className="text-xl font-semibold">
+          <h2 id="titulo-ejercicios-rutina" className="rotulo">
             Ejercicios
           </h2>
-          <span className="text-sm tabular-nums text-texto-suave">
+          <span className="font-mono text-xs font-bold tabular-nums text-zinc-500">
             {items.length}/{MAX_EJERCICIOS}
           </span>
         </div>
@@ -154,7 +154,7 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
               <li key={item.clave}>
                 <Card className="flex flex-col gap-3">
                   <div className="flex items-start gap-2">
-                    <span className="grid size-tactil shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 font-mono text-lg font-bold text-acento">
+                    <span className="cifra grid size-tactil shrink-0 place-items-center rounded-xl bg-white/[0.04] text-xl text-zinc-500">
                       {indice + 1}
                     </span>
                     <div className="flex min-w-0 flex-1 flex-col pt-1">

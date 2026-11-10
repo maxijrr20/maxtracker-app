@@ -6,28 +6,28 @@ import { Avatar } from '../atoms/Avatar'
 import { BottomNav } from '../organisms/BottomNav'
 
 /**
- * Layout de las vistas autenticadas: cabecera de vidrio, contenido y navegación (inferior en móvil, lateral desde
- * md). El avatar lleva al perfil. El padding inferior deja espacio para la barra fija y el área segura de iOS.
+ * Layout de las vistas autenticadas: cabecera fija compacta (marca + avatar → /perfil), contenido denso y
+ * navegación (inferior en móvil, lateral desde md). El padding inferior deja espacio para la barra y el área segura.
  */
 export function MainLayout() {
   const { email } = useAuth()
 
   return (
-    <div className="min-h-dvh md:pl-60">
-      <header className="sticky top-0 z-10 border-b border-borde-vidrio bg-vidrio-barra pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-1">
+    <div className="min-h-dvh md:pl-56">
+      <header className="sticky top-0 z-10 border-b border-zinc-800/60 bg-zinc-950/60 pt-[env(safe-area-inset-top)] shadow-[0_12px_28px_-18px_rgb(0_0_0/0.9)] backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4">
           {/* La marca ya está en la barra lateral desde md. */}
-          <Link to="/" className="flex min-h-tactil items-center gap-2 text-lg font-bold tracking-tight md:invisible">
-            <span className="grid size-8 place-items-center rounded-lg bg-acento text-sobre-acento shadow-neon">
+          <Link to="/" className="flex min-h-tactil items-center gap-2 md:invisible">
+            <span className="grid size-7 place-items-center rounded-lg bg-linear-to-b from-lime-400 to-lime-500 text-sobre-acento">
               <Dumbbell aria-hidden className="size-4" strokeWidth={2.5} />
             </span>
-            <span>
-              Max<span className="text-acento">Tracker</span>
+            <span className="text-base font-black tracking-tight">
+              MAX<span className="text-zinc-500">TRACKER</span>
             </span>
           </Link>
           <Link
             to="/perfil"
-            className="flex min-h-tactil min-w-tactil items-center justify-end gap-3 rounded-xl pl-2 transition-all duration-200 hover:opacity-90 active:scale-95"
+            className="flex min-h-tactil min-w-tactil items-center justify-end gap-3 rounded-xl transition-transform duration-150 active:scale-[0.98]"
           >
             <span className="hidden max-w-48 truncate text-sm text-texto-suave sm:inline">{email}</span>
             <Avatar email={email} />
@@ -36,7 +36,7 @@ export function MainLayout() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 md:pb-10">
+      <main className="mx-auto flex max-w-2xl flex-col gap-4 px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 md:pb-8">
         <Outlet />
       </main>
 

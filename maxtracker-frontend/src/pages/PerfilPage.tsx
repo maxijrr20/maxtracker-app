@@ -7,7 +7,6 @@ import { Badge } from '../components/atoms/Badge'
 import { Button } from '../components/atoms/Button'
 import { Card } from '../components/atoms/Card'
 import { Select } from '../components/atoms/Select'
-import { Titulo } from '../components/atoms/Typography'
 import { OpcionesSegmentadas } from '../components/molecules/OpcionesSegmentadas'
 import { ClaveGeminiForm } from '../components/organisms/ClaveGeminiForm'
 import { fechaLarga } from '../lib/formato'
@@ -16,25 +15,21 @@ import { hoyEnZona, zonaDelDispositivo, zonasDisponibles } from '../lib/zonaHora
 import { DESCANSOS, type DescansoSegundos, type EnfoqueIa, type UnidadPeso } from '../preferencias/preferencias'
 import { usePreferencias } from '../preferencias/preferenciasContext'
 
-/** Encabezado de un bloque de ajustes: ícono + título + subtítulo. */
+/** Encabezado compacto de un bloque de ajustes: rótulo con ícono + una línea de contexto. */
 function EncabezadoBloque({ icono: Icono, titulo, descripcion }: { icono: typeof Scale; titulo: string; descripcion: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 text-acento">
-        <Icono aria-hidden className="size-5" />
-      </span>
-      <div>
-        <Titulo nivel={2} className="text-lg">
-          {titulo}
-        </Titulo>
-        <p className="text-sm text-texto-suave">{descripcion}</p>
-      </div>
+    <div className="flex items-baseline justify-between gap-2">
+      <h2 className="rotulo flex items-center gap-1.5">
+        <Icono aria-hidden className="size-4" />
+        {titulo}
+      </h2>
+      <p className="text-right text-xs text-zinc-500">{descripcion}</p>
     </div>
   )
 }
 
 function Separador() {
-  return <hr className="border-borde-vidrio" />
+  return <hr className="border-zinc-800/60" />
 }
 
 function Ajuste({ children }: { children: ReactNode }) {
@@ -60,22 +55,23 @@ export function PerfilPage() {
       <h1 className="sr-only">Perfil y ajustes</h1>
 
       {/* Cabecera de perfil */}
-      <Card className="relative flex flex-col items-center gap-4 overflow-hidden pt-8 text-center">
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-lime-400/15 to-transparent" />
-        <Avatar email={email} tamano="lg" />
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-sm font-medium uppercase tracking-widest text-texto-suave">Tu cuenta</p>
-          <p className="max-w-full break-all text-lg font-semibold">{email}</p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Badge tono={instalada ? 'lima' : 'neutro'}>
-            {instalada ? <Smartphone aria-hidden className="size-4" /> : <Globe aria-hidden className="size-4" />}
-            {instalada ? 'App instalada' : 'Versión web'}
-          </Badge>
-          <Badge tono={claveGemini ? 'lima' : 'neutro'}>
-            <Sparkles aria-hidden className="size-4" />
-            {claveGemini ? 'IA con tu clave' : 'IA del servidor'}
-          </Badge>
+      <Card className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar email={email} tamano="lg" />
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <span className="rotulo">Tu cuenta</span>
+            <p className="truncate text-base font-bold">{email}</p>
+            <div className="flex flex-wrap gap-1.5">
+              <Badge>
+                {instalada ? <Smartphone aria-hidden className="size-3.5" /> : <Globe aria-hidden className="size-3.5" />}
+                {instalada ? 'App instalada' : 'Versión web'}
+              </Badge>
+              <Badge>
+                <Sparkles aria-hidden className="size-3.5" />
+                {claveGemini ? 'IA con tu clave' : 'IA del servidor'}
+              </Badge>
+            </div>
+          </div>
         </div>
         <Button variante="secundario" icono={LogOut} anchoCompleto onClick={salir}>
           Cerrar sesión
@@ -83,7 +79,7 @@ export function PerfilPage() {
       </Card>
 
       {/* Preferencias */}
-      <Card className="flex flex-col gap-5">
+      <Card className="flex flex-col gap-4">
         <EncabezadoBloque icono={Scale} titulo="Preferencias" descripcion="Se guardan en este dispositivo." />
 
         <OpcionesSegmentadas<UnidadPeso>
@@ -130,7 +126,7 @@ export function PerfilPage() {
       </Card>
 
       {/* Entrenador IA */}
-      <Card tono="ia" className="flex flex-col gap-5">
+      <Card className="flex flex-col gap-4">
         <EncabezadoBloque
           icono={Sparkles}
           titulo="Entrenador IA"

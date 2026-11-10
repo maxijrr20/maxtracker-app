@@ -75,9 +75,12 @@ export function RutinaDetallePage() {
 
       {rutina && (
         <>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
+            <span className="rotulo">
+              Rutina · <span className="font-mono">{rutina.ejercicios.length}</span> ejercicios
+            </span>
             <Titulo className="break-words">{rutina.nombre}</Titulo>
-            {rutina.descripcion && <Texto suave>{rutina.descripcion}</Texto>}
+            {rutina.descripcion && <Texto suave tamano="sm">{rutina.descripcion}</Texto>}
           </div>
 
           {/* Editar y eliminar arriba, lejos de la acción principal (abajo). */}

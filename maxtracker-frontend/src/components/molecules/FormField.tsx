@@ -18,7 +18,7 @@ export function FormField({ etiqueta, ayuda, error, id, ...resto }: FormFieldPro
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={idCampo} className="text-sm font-medium text-texto">
+      <label htmlFor={idCampo} className="rotulo">
         {etiqueta}
       </label>
       <Input

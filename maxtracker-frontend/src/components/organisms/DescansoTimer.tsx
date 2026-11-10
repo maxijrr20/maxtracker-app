@@ -87,26 +87,24 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <Card className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Timer aria-hidden className="size-5 text-acento" /> Descanso
+        <h2 className="rotulo flex items-center gap-1.5">
+          <Timer aria-hidden className="size-4" /> Descanso
         </h2>
-        <IconButton icono={RotateCcw} etiqueta="Reiniciar descanso" onClick={reiniciar} />
+        <IconButton icono={RotateCcw} etiqueta="Reiniciar descanso" onClick={reiniciar} className="-my-2 -mr-2" />
       </div>
 
+      {/* Único lima mientras corre (estado vivo). */}
       <p
         role="timer"
         aria-live={restante === 0 || !corriendo ? 'polite' : 'off'}
-        className={cx(
-          'text-center font-mono text-6xl font-bold tabular-nums tracking-tight transition-all duration-200',
-          corriendo ? 'text-acento drop-shadow-neon' : 'text-texto',
-        )}
+        className={cx('cifra text-center text-6xl transition-colors duration-150', corriendo ? 'text-acento' : 'text-texto')}
       >
         {formatear(restante)}
       </p>
 
-      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-5 gap-2">
+      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-5 gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80 p-1">
         {PRESETS_SEGUNDOS.map((segundos) => (
           <button
             key={segundos}
@@ -114,10 +112,8 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
             aria-pressed={duracion === segundos}
             onClick={() => elegir(segundos)}
             className={cx(
-              'min-h-tactil rounded-xl border font-mono text-sm font-bold tabular-nums transition-all duration-200 active:scale-95',
-              duracion === segundos
-                ? 'border-lime-300/70 bg-acento text-sobre-acento shadow-neon'
-                : 'border-borde-vidrio bg-zinc-800/70 text-texto hover:bg-zinc-700/70',
+              'min-h-tactil rounded-lg font-mono text-sm font-bold tabular-nums transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
+              duracion === segundos ? 'bg-zinc-100 text-zinc-950' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
             )}
           >
             {formatear(segundos)}
@@ -126,11 +122,11 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
       </div>
 
       {corriendo ? (
-        <Button variante="secundario" tamano="lg" anchoCompleto icono={Pause} onClick={pausar}>
+        <Button variante="secundario" anchoCompleto icono={Pause} onClick={pausar}>
           Pausar
         </Button>
       ) : (
-        <Button tamano="lg" anchoCompleto icono={Play} onClick={iniciar}>
+        <Button variante="secundario" anchoCompleto icono={Play} onClick={iniciar}>
           {pausadoCon !== null ? 'Reanudar' : 'Iniciar descanso'}
         </Button>
       )}

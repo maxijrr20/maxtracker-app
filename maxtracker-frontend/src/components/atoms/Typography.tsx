@@ -5,9 +5,9 @@ import { cx } from '../../lib/cx'
 type Nivel = 1 | 2 | 3
 
 const NIVELES: Record<Nivel, string> = {
-  1: 'text-2xl font-bold tracking-tight sm:text-3xl',
-  2: 'text-xl font-semibold tracking-tight',
-  3: 'text-lg font-semibold',
+  1: 'text-2xl font-black tracking-tight sm:text-3xl',
+  2: 'text-base font-bold tracking-tight',
+  3: 'text-base font-bold leading-tight',
 }
 
 export interface TituloProps extends HTMLAttributes<HTMLHeadingElement> {

@@ -11,12 +11,12 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
 }
 
 const VARIANTES = {
-  fantasma: 'text-texto-suave hover:bg-white/5 hover:text-texto',
-  secundario: 'border border-borde-vidrio bg-zinc-800/70 text-texto hover:bg-zinc-700/70',
-  peligro: 'text-peligro hover:bg-red-500/15',
+  fantasma: 'text-zinc-500 hover:bg-white/[0.04] hover:text-texto',
+  secundario: 'bg-white/[0.05] text-texto ring-1 ring-inset ring-white/10 hover:bg-white/[0.09]',
+  peligro: 'text-zinc-500 hover:bg-red-500/10 hover:text-peligro',
 } as const
 
-/** Botón de solo ícono, cuadrado de 48x48 px aunque el ícono sea de 20-24 px. */
+/** Botón de solo ícono: 48x48 px aunque el ícono sea de 20-24 px. */
 export function IconButton({ icono: Icono, etiqueta, variante = 'fantasma', className, type = 'button', ...resto }: IconButtonProps) {
   return (
     <button
@@ -24,14 +24,15 @@ export function IconButton({ icono: Icono, etiqueta, variante = 'fantasma', clas
       aria-label={etiqueta}
       title={etiqueta}
       className={cx(
-        'inline-grid size-tactil shrink-0 place-items-center rounded-xl transition-all duration-200 active:scale-95',
-        'disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-grid size-tactil shrink-0 place-items-center rounded-xl',
+        'transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
+        'disabled:cursor-not-allowed disabled:opacity-40',
         VARIANTES[variante],
         className,
       )}
       {...resto}
     >
-      <Icono aria-hidden className="size-6" />
+      <Icono aria-hidden className="size-5" />
     </button>
   )
 }

@@ -3,15 +3,13 @@ import { useId, useState } from 'react'
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
 import type { EjercicioConHistorial, ProgresoEjercicio, PuntoProgreso } from '../../api/types'
-import { COLOR_GRAFICO } from '../../lib/coloresGrafico'
+import { COLOR_GRAFICO, FUENTE_MONO } from '../../lib/coloresGrafico'
 import { cx } from '../../lib/cx'
 import { usePeso } from '../../hooks/usePeso'
 import { fechaCorta } from '../../lib/formato'
 import { Card } from '../atoms/Card'
-import { Chip } from '../atoms/Chip'
 import { Select } from '../atoms/Select'
 import { Spinner } from '../atoms/Spinner'
-import { Titulo } from '../atoms/Typography'
 import { EmptyState } from '../molecules/EmptyState'
 import { TablaGrafico } from '../molecules/TablaGrafico'
 import { TooltipGrafico } from '../molecules/TooltipGrafico'
@@ -53,10 +51,10 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
   )
 
   return (
-    <Card className="flex flex-col gap-4">
-      <div>
-        <Titulo nivel={2}>Evolución por ejercicio</Titulo>
-        <p className="text-sm text-texto-suave">{MEDIDAS[medida].descripcion}</p>
+    <Card className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="rotulo">Evolución por ejercicio</h2>
+        <p className="text-xs text-zinc-500">{MEDIDAS[medida].descripcion}</p>
       </div>
 
       {ejercicios.length === 0 ? (
@@ -68,7 +66,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
       ) : (
         <>
           {/* Filtros en una fila, arriba del gráfico. */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <label htmlFor={idSelect} className="sr-only">
               Ejercicio
             </label>
@@ -83,25 +81,34 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                 </option>
               ))}
             </Select>
-            <div role="group" aria-label="Medida" className="grid grid-cols-3 gap-2">
+            <div role="group" aria-label="Medida" className="grid grid-cols-3 gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80 p-1">
               {(Object.keys(MEDIDAS) as Medida[]).map((m) => (
-                <Chip key={m} activo={medida === m} onClick={() => setMedida(m)} className="justify-center px-2">
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={medida === m}
+                  onClick={() => setMedida(m)}
+                  className={cx(
+                    'min-h-tactil rounded-lg text-sm font-semibold transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
+                    medida === m ? 'bg-zinc-100 text-zinc-950' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
+                  )}
+                >
                   {MEDIDAS[m].etiqueta}
-                </Chip>
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Cifras clave como texto: el último valor y el mejor (la "etiqueta directa" de la línea). */}
+          {/* Cifras clave (la "etiqueta directa" de la línea): la última y la mejor; la mejor es el PR (foco lima). */}
           {ultimo && mejor && (
-            <dl className="grid grid-cols-2 gap-2">
-              <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
-                <dt className="text-xs text-texto-suave">Última sesión · {fechaCorta(ultimo.fecha)}</dt>
-                <dd className="font-mono text-xl font-bold">{formatoPeso(ultimo[medida])}</dd>
+            <dl className="grid grid-cols-2 divide-x divide-zinc-800/60 rounded-xl bg-white/[0.03] py-2">
+              <div className="flex flex-col gap-1 px-3">
+                <dt className="rotulo">Última · {fechaCorta(ultimo.fecha)}</dt>
+                <dd className="cifra text-2xl text-texto">{formatoPeso(ultimo[medida])}</dd>
               </div>
-              <div className="rounded-xl border border-white/5 bg-zinc-950/40 p-3">
-                <dt className="text-xs text-texto-suave">Mejor · {fechaCorta(mejor.fecha)}</dt>
-                <dd className="font-mono text-xl font-bold">{formatoPeso(mejor[medida])}</dd>
+              <div className="flex flex-col gap-1 px-3">
+                <dt className="rotulo">Mejor · {fechaCorta(mejor.fecha)}</dt>
+                <dd className="cifra text-2xl text-acento">{formatoPeso(mejor[medida])}</dd>
               </div>
             </dl>
           )}
@@ -113,7 +120,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
           ) : puntos.length > 0 ? (
             // Al recargar se mantiene el gráfico anterior atenuado (sin saltos de layout).
             <div
-              className={cx('h-56 transition-opacity', cargando && 'opacity-50')}
+              className={cx('h-44 transition-opacity', cargando && 'opacity-50')}
               role="img"
               aria-label={`Gráfico de ${MEDIDAS[medida].serie} de ${progreso?.ejercicioNombre ?? 'el ejercicio'}`}
             >
@@ -123,7 +130,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                   <XAxis
                     dataKey="fecha"
                     tickFormatter={fechaCorta}
-                    tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+                    tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 11, fontFamily: FUENTE_MONO }}
                     axisLine={false}
                     tickLine={false}
                     interval="preserveStartEnd"
@@ -132,7 +139,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                   <YAxis
                     domain={medida === 'volumenKg' ? [0, 'auto'] : ['auto', 'auto']}
                     tickFormatter={formatoPesoCompacto}
-                    tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+                    tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 11, fontFamily: FUENTE_MONO }}
                     axisLine={false}
                     tickLine={false}
                     width={44}
@@ -159,7 +166,21 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    dot={{ r: 4, fill: COLOR_GRAFICO.marca, stroke: COLOR_GRAFICO.superficie, strokeWidth: 2 }}
+                    // Puntos en gris; el del mejor valor (PR) en lima.
+                    dot={(props: { cx?: number; cy?: number; index?: number; payload?: PuntoProgreso }) => {
+                      const esMejor = props.payload?.sesionId === mejor?.sesionId
+                      return (
+                        <circle
+                          key={`punto-${props.index}`}
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={esMejor ? 5 : 4}
+                          fill={esMejor ? COLOR_GRAFICO.foco : COLOR_GRAFICO.marca}
+                          stroke={COLOR_GRAFICO.superficie}
+                          strokeWidth={2}
+                        />
+                      )
+                    }}
                     activeDot={{ r: 6, fill: COLOR_GRAFICO.marcaActiva, stroke: COLOR_GRAFICO.superficie, strokeWidth: 2 }}
                     isAnimationActive={false}
                   />

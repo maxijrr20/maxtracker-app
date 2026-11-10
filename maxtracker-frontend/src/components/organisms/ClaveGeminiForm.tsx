@@ -43,13 +43,13 @@ export function ClaveGeminiForm({ clave, onGuardar, onQuitar }: ClaveGeminiFormP
   if (clave && !editando) {
     return (
       <div className="flex flex-col gap-3">
-        <div className="flex min-h-tactil items-center gap-3 rounded-xl border border-lime-500/20 bg-lime-500/10 px-4">
-          <ShieldCheck aria-hidden className="size-5 shrink-0 text-acento" />
+        <div className="flex min-h-tactil items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-950/80 px-3">
+          <ShieldCheck aria-hidden className="size-5 shrink-0 text-exito" />
           <span className="flex-1 font-mono text-sm tracking-wider text-texto">
             <span className="sr-only">Clave guardada que termina en </span>
             ••••••••{clave.slice(-4)}
           </span>
-          <Badge tono="lima">En uso</Badge>
+          <Badge tono="exito">En uso</Badge>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Button variante="secundario" icono={KeyRound} onClick={() => setEditando(true)}>
@@ -97,7 +97,7 @@ export function ClaveGeminiForm({ clave, onGuardar, onQuitar }: ClaveGeminiFormP
               href="https://aistudio.google.com/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-acento underline-offset-4 hover:underline"
+              className="font-semibold text-texto underline underline-offset-4 hover:text-acento"
             >
               aistudio.google.com/apikey
             </a>

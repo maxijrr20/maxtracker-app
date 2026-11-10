@@ -3,31 +3,31 @@ import type { ReactNode } from 'react'
 import { usePeso } from '../../hooks/usePeso'
 import { cx } from '../../lib/cx'
 
-type Tono = 'neutro' | 'lima' | 'exito' | 'alerta'
+type Tono = 'neutro' | 'acento' | 'exito' | 'alerta'
 
 const TONOS: Record<Tono, string> = {
-  neutro: 'border-zinc-700/60 bg-zinc-800/70 text-zinc-200',
-  // Datos de entrenamiento (peso, RIR, objetivo): lima semitransparente.
-  lima: 'border-lime-500/20 bg-lime-500/10 text-lime-400',
-  exito: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
-  alerta: 'border-amber-400/20 bg-amber-400/10 text-amber-200',
+  neutro: 'bg-white/[0.06] text-zinc-300',
+  // Solo puntos de foco: RIR ≤ 1, PR, "en curso".
+  acento: 'bg-lime-400/10 text-lime-400 ring-1 ring-inset ring-lime-400/25',
+  exito: 'bg-emerald-400/10 text-emerald-300 ring-1 ring-inset ring-emerald-400/20',
+  alerta: 'bg-amber-400/10 text-amber-200 ring-1 ring-inset ring-amber-400/20',
 }
 
 export interface BadgeProps {
   tono?: Tono
-  /** Monoespaciada, para cifras (peso, RIR, series). */
+  /** Cifras (peso, RIR, objetivos) en monoespaciada. */
   mono?: boolean
   children: ReactNode
   className?: string
 }
 
-/** Etiqueta compacta e informativa (no interactiva) en forma de píldora. */
+/** Píldora minimalista, informativa (no interactiva). */
 export function Badge({ tono = 'neutro', mono = false, children, className }: BadgeProps) {
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm font-semibold tabular-nums',
-        mono && 'font-mono',
+        'inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold tabular-nums',
+        mono ? 'font-mono' : 'font-sans',
         TONOS[tono],
         className,
       )}
@@ -37,20 +37,23 @@ export function Badge({ tono = 'neutro', mono = false, children, className }: Ba
   )
 }
 
-/** Peso en la unidad que eligió el usuario (los datos están siempre en kg). */
+/** Peso en la unidad del usuario (los datos están siempre en kg). Neutro: el peso común no es un punto de foco. */
 export function PesoBadge({ kg }: { kg: number }) {
   const { formato } = usePeso()
   return (
-    <Badge tono="lima" mono>
+    <Badge mono>
       {formato(kg)}
     </Badge>
   )
 }
 
+/** Umbral de "RIR bajo" (al fallo o a una repetición): único caso en que el RIR se enciende en lima. */
+const RIR_BAJO = 1
+
 /** RIR = repeticiones en reserva (0 = al fallo). */
 export function RirBadge({ rir }: { rir: number }) {
   return (
-    <Badge tono="lima" mono>
+    <Badge tono={rir <= RIR_BAJO ? 'acento' : 'neutro'} mono className={rir >= 4 ? 'text-zinc-400' : undefined}>
       <abbr title="Repeticiones en reserva" className="no-underline">
         RIR
       </abbr>{' '}

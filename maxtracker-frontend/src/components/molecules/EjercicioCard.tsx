@@ -1,10 +1,9 @@
-import { CircleCheck, Dumbbell } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { cx } from '../../lib/cx'
+import { claseGrupo } from '../../lib/gruposMusculares'
 import { Badge } from '../atoms/Badge'
 import { Card } from '../atoms/Card'
-import { Titulo } from '../atoms/Typography'
 
 export interface EjercicioCardProps {
   nombre: string
@@ -14,6 +13,8 @@ export interface EjercicioCardProps {
   repeticionesObjetivo?: number | null
   /** Series hechas en la sesión actual (para mostrar el avance contra el objetivo). */
   seriesHechas?: number
+  /** La sesión está en curso: la barra de avance se enciende (estado vivo). */
+  enCurso?: boolean
   /** Contenido extra: lista de series, formulario de registro, etc. */
   children?: ReactNode
 }
@@ -26,8 +27,8 @@ function textoObjetivo(series?: number | null, reps?: number | null): string | n
 }
 
 /**
- * Ejercicio con su objetivo; se usa en el detalle de rutina y en la sesión de entrenamiento. El orden va en cifra
- * monoespaciada grande y, si hay objetivo de series, una barra de avance con resplandor al completarse.
+ * Ejercicio con encabezado compacto: indicador vertical del grupo muscular, rótulo (orden · grupo), título en una
+ * línea, badges a la derecha y barra de avance de 2 px. Lo demás (series, formulario) va debajo de un hairline.
  */
 export function EjercicioCard({
   nombre,
@@ -36,54 +37,56 @@ export function EjercicioCard({
   seriesObjetivo,
   repeticionesObjetivo,
   seriesHechas,
+  enCurso = false,
   children,
 }: EjercicioCardProps) {
   const objetivo = textoObjetivo(seriesObjetivo, repeticionesObjetivo)
   const conAvance = seriesHechas !== undefined && Boolean(seriesObjetivo)
   const completo = conAvance && seriesHechas! >= seriesObjetivo!
   const porcentaje = conAvance ? Math.min(100, Math.round((seriesHechas! / seriesObjetivo!) * 100)) : 0
+  const rotulo = [orden !== undefined ? String(orden).padStart(2, '0') : null, categoria ?? 'Ejercicio']
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <Card tono={completo ? 'lima' : 'normal'} className="flex flex-col gap-4">
-      <div className="flex items-start gap-3">
-        <span className="grid size-tactil shrink-0 place-items-center rounded-xl border border-lime-500/20 bg-lime-500/10 font-mono text-xl font-bold text-acento">
-          {orden !== undefined ? String(orden).padStart(2, '0') : <Dumbbell aria-hidden className="size-6" />}
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          {categoria && (
-            <span className="text-xs font-semibold uppercase tracking-widest text-texto-suave">{categoria}</span>
-          )}
-          <Titulo nivel={3} className="break-words leading-tight">
-            {nombre}
-          </Titulo>
+    <Card className="flex flex-col gap-2 overflow-hidden pl-4">
+      {/* Indicador vertical del grupo muscular (identidad; el nombre del grupo va en el rótulo). */}
+      <span aria-hidden className={cx('absolute inset-y-3 left-0 w-1 rounded-r-full', claseGrupo(categoria))} />
+
+      <div className="flex items-start gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="rotulo truncate">{rotulo}</span>
+          <h3 className="line-clamp-2 text-base font-bold leading-tight text-texto">{nombre}</h3>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
           {objetivo && (
-            <Badge tono="lima" mono className="self-start">
-              Objetivo {objetivo}
+            <Badge mono>
+              <span className="sr-only">Objetivo </span>
+              {objetivo}
+            </Badge>
+          )}
+          {conAvance && (
+            <Badge tono={completo ? 'exito' : 'neutro'} mono>
+              {seriesHechas}/{seriesObjetivo}
+              <span className="sr-only"> series hechas</span>
             </Badge>
           )}
         </div>
       </div>
 
       {conAvance && (
-        <div className="flex items-center gap-3">
-          <div aria-hidden className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-800">
-            <div
-              className={cx(
-                'h-full rounded-full transition-all duration-500',
-                completo ? 'bg-acento shadow-neon' : 'bg-lime-500/70',
-              )}
-              style={{ width: `${porcentaje}%` }}
-            />
-          </div>
-          <span className={cx('flex items-center gap-1 font-mono text-sm font-bold tabular-nums', completo ? 'text-acento' : 'text-texto-suave')}>
-            {completo && <CircleCheck aria-hidden className="size-4" />}
-            {seriesHechas}/{seriesObjetivo}
-            <span className="sr-only"> series hechas</span>
-          </span>
+        <div aria-hidden className="h-0.5 overflow-hidden rounded-full bg-zinc-800">
+          <div
+            className={cx(
+              'h-full rounded-full transition-[width] duration-500 ease-out',
+              enCurso || completo ? 'bg-acento' : 'bg-zinc-300',
+            )}
+            style={{ width: `${porcentaje}%` }}
+          />
         </div>
       )}
 
-      {children}
+      {children && <div className="flex flex-col gap-2 border-t border-zinc-800/60 pt-2">{children}</div>}
     </Card>
   )
 }

@@ -17,7 +17,7 @@ export function RegisterPage() {
       <AuthForm modo="registro" onEnviar={registrarse} />
       <Texto suave className="text-center">
         ¿Ya tienes cuenta?{' '}
-        <Link to="/login" state={ubicacion.state} className="inline-flex min-h-tactil items-center font-semibold text-acento underline-offset-4 hover:underline">
+        <Link to="/login" state={ubicacion.state} className="inline-flex min-h-tactil items-center font-semibold text-texto underline underline-offset-4 hover:text-acento">
           Inicia sesión
         </Link>
       </Texto>

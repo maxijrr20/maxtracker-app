@@ -1,50 +1,46 @@
 @import "tailwindcss";
 
 /*
- * Tokens de diseño (ver la skill ui-ux-designer). Modo oscuro por defecto: la app no tiene tema claro.
- * Se usan como utilidades de Tailwind: bg-fondo, bg-vidrio, text-acento, border-borde-vidrio, shadow-neon, etc.
+ * Sistema "Pro Sports Dark" (ver la skill ui-ux-designer). Modo oscuro único.
+ * Superficies elevadas con micro-borde en degradado, cifras en mono black, lima solo en puntos de foco.
  */
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Cifras de entrenamiento (peso, series, tiempo): monoespaciada, se alinean y se leen de un vistazo. */
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  /* Geist Mono Variable (100–900, OFL), empaquetada: el peso black es real y funciona sin conexión. */
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
 
-  /* Profundidad: degradado de zinc-900 (arriba) a negro (abajo); ver body::before. */
   --color-fondo: var(--color-zinc-950);
-  --color-fondo-arriba: var(--color-zinc-900);
-  --color-fondo-abajo: #000;
-
-  /* Vidrio (glassmorphism): tarjetas, barras y hojas. Siempre con backdrop-blur-xl. */
-  --color-vidrio: color-mix(in oklab, var(--color-zinc-900) 70%, transparent);
-  --color-vidrio-barra: color-mix(in oklab, var(--color-zinc-950) 75%, transparent);
-  --color-borde-vidrio: color-mix(in oklab, var(--color-zinc-800) 80%, transparent);
-
-  --color-superficie: var(--color-zinc-900);
-  --color-superficie-alta: var(--color-zinc-800);
-  --color-borde: var(--color-zinc-800);
   --color-texto: var(--color-zinc-50);
   --color-texto-suave: var(--color-zinc-400);
 
-  /* Acción principal: lima sobre fondo oscuro (contraste > 12:1); el texto encima va en zinc-950. */
+  /* Lima: solo puntos de foco (acción primaria, navegación activa, RIR bajo, PR, estado vivo, foco). */
   --color-acento: var(--color-lime-400);
-  --color-acento-hover: var(--color-lime-300);
   --color-sobre-acento: var(--color-zinc-950);
-
-  /* Resplandor neón del lima: acción principal, ruta activa, cifras clave. */
-  --shadow-neon: 0 0 20px rgb(163 230 53 / 0.2);
-  --shadow-neon-fuerte: 0 0 28px rgb(163 230 53 / 0.35);
-  --drop-shadow-neon: 0 0 6px rgb(163 230 53 / 0.55);
-
-  /*
-   * Gráficos. La marca de datos es lime-600 (no el lima-400 de la UI): validado con el script de la skill dataviz
-   * para modo oscuro sobre zinc-900 (banda de luminosidad 0.48–0.67, croma y contraste ≥ 3:1).
-   * Rejilla: un paso por encima de la superficie, hairline.
-   */
-  --color-grafico: #65a30d;
-  --color-grafico-rejilla: var(--color-zinc-800);
 
   --color-peligro: var(--color-red-400);
   --color-exito: var(--color-emerald-400);
+
+  /*
+   * Grupos musculares: paleta categórica validada (skill dataviz, modo oscuro sobre #09090b: luminosidad,
+   * croma, CVD adyacente ΔE ≥ 14,5, visión normal y contraste ≥ 3:1). Usar en este orden; nunca lima/verde/rojo.
+   */
+  --color-grupo-pecho: #f43f5e;
+  --color-grupo-espalda: #0284c7;
+  --color-grupo-piernas: #d97706;
+  --color-grupo-hombros: #8b5cf6;
+  --color-grupo-brazos: #0d9488;
+  --color-grupo-abdominales: #d946ef;
+  --color-grupo-pantorrillas: #ea580c;
+  --color-grupo-cardio: #3b82f6;
+  --color-grupo-otro: #52525b;
+
+  /* Luz desde arriba: filo claro interior arriba + sombra corta y profunda hacia abajo. */
+  --shadow-elevada: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.6),
+    0 14px 28px -14px rgb(0 0 0 / 0.9);
+  --shadow-elevada-alta: inset 0 1px 0 0 rgb(255 255 255 / 0.07), 0 4px 8px -4px rgb(0 0 0 / 0.7),
+    0 24px 40px -18px rgb(0 0 0 / 0.95);
+  /* Profundidad táctil del botón primario. */
+  --shadow-primario: 0 4px 20px rgb(163 230 53 / 0.15);
 
   /* Área táctil mínima (WCAG 2.5.5 / Material: 48x48 px). */
   --spacing-tactil: 3rem;
@@ -67,10 +63,7 @@
     overscroll-behavior-y: none;
   }
 
-  /*
-   * Fondo con profundidad: degradado fijo detrás de todo (un pseudo-elemento fijo en lugar de
-   * background-attachment: fixed, que iOS ignora) y un halo lima muy tenue arriba.
-   */
+  /* Fondo: zinc-950 → negro con un halo lima mínimo arriba. Pseudo-elemento fijo (iOS ignora background-attachment). */
   body::before {
     content: "";
     position: fixed;
@@ -78,19 +71,64 @@
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(120% 60% at 50% -10%, rgb(163 230 53 / 0.07), transparent 60%),
-      linear-gradient(to bottom, var(--color-fondo-arriba) 0%, var(--color-fondo) 45%, var(--color-fondo-abajo) 100%);
+      radial-gradient(110% 50% at 50% -12%, rgb(163 230 53 / 0.045), transparent 60%),
+      linear-gradient(to bottom, var(--color-zinc-950) 0%, #050506 55%, #000 100%);
   }
 
-  /* Foco visible y grueso para navegar con teclado o lector de pantalla. */
+  /* Foco de teclado: grueso y visible siempre (el halo tenue de los inputs lo complementa, no lo reemplaza). */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-acento;
   }
 }
 
-/* Superficie de vidrio: la base de Card, Sheet y las barras de navegación. */
-@utility vidrio {
-  @apply bg-vidrio backdrop-blur-xl;
+/*
+ * Micro-borde de 1 px en degradado sobre superficies translúcidas (el truco padding-box/border-box no sirve con
+ * fondo semitransparente). Más claro arriba, de donde viene la luz.
+ */
+@utility borde-degradado {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.04) 45%, rgb(255 255 255 / 0.07));
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+}
+
+/* Superficie "encendida": sesión en curso, PR recién logrado. Una por pantalla como mucho. */
+@utility borde-degradado-acento {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(163 230 53 / 0.55), rgb(163 230 53 / 0.08) 50%, rgb(255 255 255 / 0.05));
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+}
+
+/* Superficie elevada: base de Card, Sheet, listas y avisos. El blur solo en contenedores de primer nivel. */
+@utility superficie {
+  @apply rounded-2xl bg-zinc-900/40 shadow-elevada backdrop-blur-2xl;
+}
+
+/* Cifra de tablero: mono black, compacta y sin "baile" al cambiar. */
+@utility cifra {
+  @apply font-mono font-black tracking-tight tabular-nums leading-none;
+}
+
+/* Rótulo: mayúsculas pequeñas con tracking amplio. */
+@utility rotulo {
+  @apply text-xs font-semibold uppercase tracking-[0.14em] text-texto-suave;
 }
 
 /* Respeta "reducir movimiento" del sistema operativo. */

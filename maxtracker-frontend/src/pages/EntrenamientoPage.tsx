@@ -234,6 +234,13 @@ export function EntrenamientoPage() {
   }
 
   const ejercicios = agrupar(actual, pendientes)
+  // Ejercicio actual: el primero que no completó su objetivo (o sin series). Único con acción primaria y barra lima.
+  const claveActual = actual.finalizada
+    ? undefined
+    : (
+        ejercicios.find((e) => (e.plan?.seriesObjetivo ? e.series.length < e.plan.seriesObjetivo : e.series.length === 0)) ??
+        ejercicios.at(-1)
+      )?.clave
   const enCurso = !actual.finalizada
 
   return (
@@ -251,7 +258,6 @@ export function EntrenamientoPage() {
           ) : (
             <Button
               variante={confirmandoFin ? 'primario' : 'secundario'}
-              tamano="lg"
               anchoCompleto
               icono={CircleCheck}
               cargando={finalizando}
@@ -303,9 +309,10 @@ export function EntrenamientoPage() {
                   seriesObjetivo={ejercicio.plan?.seriesObjetivo}
                   repeticionesObjetivo={ejercicio.plan?.repeticionesObjetivo}
                   seriesHechas={ejercicio.series.length}
+                  enCurso={ejercicio.clave === claveActual}
                 >
                   {ejercicio.series.length > 0 && (
-                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col gap-2">
+                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col divide-y divide-zinc-800/60">
                       {ejercicio.series.map((serie) => (
                         <SerieRow key={serie.id} serie={serie} onEliminar={enCurso ? quitarSerie : undefined} />
                       ))}
@@ -319,6 +326,7 @@ export function EntrenamientoPage() {
                       pesoInicial={ultima?.pesoKg}
                       repeticionesIniciales={ultima?.repeticiones ?? ejercicio.plan?.repeticionesObjetivo ?? undefined}
                       onRegistrar={registrar}
+                      destacado={ejercicio.clave === claveActual}
                     />
                   )}
                   {enCurso && ejercicio.pendiente && (

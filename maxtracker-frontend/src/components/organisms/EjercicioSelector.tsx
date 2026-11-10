@@ -177,7 +177,7 @@ export function EjercicioSelector({
 
   return (
     <Sheet abierto={abierto} onCerrar={onCerrar} titulo={titulo}>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <div className="relative">
           <Search aria-hidden className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-texto-suave" />
           <Input
@@ -206,15 +206,16 @@ export function EjercicioSelector({
 
         {localesFiltrados.length > 0 && (
           <section aria-labelledby="titulo-locales" className="flex flex-col gap-2">
-            <h3 id="titulo-locales" className="text-sm font-semibold uppercase tracking-wide text-texto-suave">
+            <h3 id="titulo-locales" className="rotulo">
               Tus ejercicios
             </h3>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col divide-y divide-zinc-800/60">
               {localesFiltrados.map((e) => (
                 <li key={e.ejercicioId}>
                   <EjercicioOpcion
                     nombre={e.nombre}
                     detalle={e.categoria}
+                    categoria={e.categoria}
                     onElegir={() =>
                       elegir({ ref: { ejercicioId: e.ejercicioId }, nombre: e.nombre, categoria: e.categoria })
                     }
@@ -227,15 +228,16 @@ export function EjercicioSelector({
 
         {catalogoFiltrado.length > 0 && (
           <section aria-labelledby="titulo-catalogo" className="flex flex-col gap-2">
-            <h3 id="titulo-catalogo" className="text-sm font-semibold uppercase tracking-wide text-texto-suave">
+            <h3 id="titulo-catalogo" className="rotulo">
               Catálogo
             </h3>
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col divide-y divide-zinc-800/60">
               {catalogoFiltrado.map((e) => (
                 <li key={e.id}>
                   <EjercicioOpcion
                     nombre={e.nombre}
                     detalle={detalleCatalogo(e)}
+                    categoria={e.categoria}
                     imagenUrl={e.imagenUrl}
                     onElegir={() => elegir({ ref: { wgerId: e.id }, nombre: e.nombre, categoria: e.categoria })}
                   />
