@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de diseño (ver la skill ui-ux-designer). Modo oscuro por defecto: la app no tiene tema claro.
+ * Se usan como utilidades de Tailwind: bg-fondo, bg-superficie, text-acento, border-borde, etc.
+ */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-fondo: var(--color-zinc-950);
+  --color-superficie: var(--color-zinc-900);
+  --color-superficie-alta: var(--color-zinc-800);
+  --color-borde: var(--color-zinc-800);
+  --color-texto: var(--color-zinc-50);
+  --color-texto-suave: var(--color-zinc-400);
+
+  /* Acción principal: lima sobre fondo oscuro (contraste > 12:1); el texto encima va en zinc-950. */
+  --color-acento: var(--color-lime-400);
+  --color-acento-hover: var(--color-lime-300);
+  --color-sobre-acento: var(--color-zinc-950);
+
+  --color-peligro: var(--color-red-400);
+  --color-exito: var(--color-emerald-400);
+
+  /* Área táctil mínima (WCAG 2.5.5 / Material: 48x48 px). */
+  --spacing-tactil: 3rem;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100dvh;
+  }
+
+  body {
+    @apply bg-fondo text-texto font-sans antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  /* Foco visible y grueso para navegar con teclado o lector de pantalla. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-acento;
+  }
+}
+
+/* Respeta "reducir movimiento" del sistema operativo. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
