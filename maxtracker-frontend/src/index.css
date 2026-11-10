@@ -19,6 +19,14 @@
   --color-acento-hover: var(--color-lime-300);
   --color-sobre-acento: var(--color-zinc-950);
 
+  /*
+   * Gráficos. La marca de datos es lime-600 (no el lima-400 de la UI): validado con el script de la skill dataviz
+   * para modo oscuro sobre zinc-900 (banda de luminosidad 0.48–0.67, croma y contraste ≥ 3:1).
+   * Rejilla: un paso por encima de la superficie, hairline.
+   */
+  --color-grafico: #65a30d;
+  --color-grafico-rejilla: var(--color-zinc-800);
+
   --color-peligro: var(--color-red-400);
   --color-exito: var(--color-emerald-400);
 

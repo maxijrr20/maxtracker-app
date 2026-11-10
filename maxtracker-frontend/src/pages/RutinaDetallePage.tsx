@@ -11,12 +11,15 @@ import { Spinner } from '../components/atoms/Spinner'
 import { Texto, Titulo } from '../components/atoms/Typography'
 import { Alert } from '../components/molecules/Alert'
 import { RutinaEjercicioList } from '../components/organisms/RutinaEjercicioList'
+import { TarjetaAnalisisIa } from '../components/molecules/TarjetaAnalisisIa'
+import { useAnalisisIa } from '../hooks/useAnalisisIa'
 import { useCarga } from '../hooks/useCarga'
 
 export function RutinaDetallePage() {
   const id = Number(useParams().id)
   const navegar = useNavigate()
   const { datos: rutina, cargando, error, recargar } = useCarga((signal) => obtenerRutina(id, signal), [id])
+  const analisisIa = useAnalisisIa({ rutinaId: id })
   const [iniciando, setIniciando] = useState(false)
   const [errorInicio, setErrorInicio] = useState<string | null>(null)
 
@@ -91,6 +94,15 @@ export function RutinaDetallePage() {
           </div>
 
           <RutinaEjercicioList ejercicios={rutina.ejercicios} />
+
+          {rutina.ejercicios.length > 0 && (
+            <TarjetaAnalisisIa
+              {...analisisIa}
+              onSolicitar={analisisIa.solicitar}
+              descripcion="Analiza tus últimas 4 semanas con esta rutina: sobrecarga progresiva, RIR y ajustes."
+              textoBoton="Analizar esta rutina"
+            />
+          )}
 
           {/* Acción principal fija sobre la barra inferior en móvil: siempre al alcance del pulgar. */}
           <div className="sticky bottom-[calc(5rem+env(safe-area-inset-bottom))] flex flex-col gap-3 md:bottom-6">

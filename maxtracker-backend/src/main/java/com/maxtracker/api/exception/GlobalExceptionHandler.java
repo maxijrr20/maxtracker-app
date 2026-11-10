@@ -62,6 +62,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "conflicto");
     }
 
+    @ExceptionHandler(IaNoDisponibleException.class)
+    public ProblemDetail manejarIaNoDisponible(IaNoDisponibleException ex) {
+        return problema(HttpStatus.SERVICE_UNAVAILABLE, "Análisis con IA no disponible", ex.getMessage() + ".",
+                "ia-no-disponible");
+    }
+
+    @ExceptionHandler(SinDatosParaAnalisisException.class)
+    public ProblemDetail manejarSinDatosParaAnalisis(SinDatosParaAnalisisException ex) {
+        return problema(HttpStatus.UNPROCESSABLE_ENTITY, "Sin datos para analizar", ex.getMessage() + ".",
+                "sin-datos-para-analisis");
+    }
+
+    @ExceptionHandler(AnalisisDemasiadoFrecuenteException.class)
+    public ResponseEntity<ProblemDetail> manejarAnalisisFrecuente(AnalisisDemasiadoFrecuenteException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(Math.max(1, ex.getEspera().toSeconds())))
+                .body(problema(HttpStatus.TOO_MANY_REQUESTS, "Demasiadas solicitudes", ex.getMessage() + ".",
+                        "demasiadas-solicitudes"));
+    }
+
     @ExceptionHandler(EmailYaRegistradoException.class)
     public ProblemDetail manejarEmailYaRegistrado(EmailYaRegistradoException ex) {
         return problema(HttpStatus.CONFLICT, "Email ya registrado", ex.getMessage(), "email-ya-registrado");

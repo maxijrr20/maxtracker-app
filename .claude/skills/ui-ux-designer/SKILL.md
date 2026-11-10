@@ -72,6 +72,7 @@ Al crear un componente:
 | atom | `Card` | Superficie base |
 | atom | `Titulo`, `Texto` | Tipografía semántica (h1–h3, p) |
 | atom | `Chip` | Filtro alternable de 48 px (`aria-pressed`), p. ej. grupo muscular |
+| atom | `Select` | Lista desplegable nativa de 48 px (selector del sistema en móvil) |
 | molecule | `FormField` | Label visible + Input + ayuda/error con `aria-describedby` |
 | molecule | `Alert` | Error (`role="alert"`) o info (`role="status"`) |
 | molecule | `EmptyState` | Lista vacía: ícono + título + descripción + acción |
@@ -81,6 +82,10 @@ Al crear un componente:
 | molecule | `Sheet` | Modal sobre `<dialog>`: hoja inferior en móvil, diálogo centrado desde `md`; Esc y toque fuera cierran |
 | molecule | `ContadorField` | Número con − / + de 48 px (series, reps objetivo); bajar del mínimo lo deja vacío |
 | molecule | `EjercicioOpcion` | Fila de resultado del buscador (imagen, nombre, grupo/músculos) |
+| molecule | `StatTile` | Cifra destacada + variación (ícono y texto, nunca solo color) + detalle |
+| molecule | `TooltipGrafico` | Tooltip de recharts: valor fuerte, serie y fecha secundarias, clave de línea |
+| molecule | `TablaGrafico` | Los datos de un gráfico como tabla plegable (accesibilidad) |
+| molecule | `TarjetaAnalisisIa` | Recomendaciones del entrenador virtual (IA); recibe estado y `onSolicitar` por props |
 | organism | `AuthForm` | Login / registro con validación igual al backend |
 | organism | `BottomNav` | Barra inferior en móvil, lateral desde `md` |
 | organism | `RutinaEjercicioList` | Ejercicios de una rutina en orden |
@@ -90,6 +95,9 @@ Al crear un componente:
 | organism | `EjercicioSelector` | Buscador en `Sheet`: chips de grupo muscular + texto; "Tus ejercicios" y catálogo. Recibe `buscarCatalogo` por props |
 | organism | `RutinaForm` | Crear/editar rutina: nombre, descripción, ejercicios con `ContadorField`, reordenar y quitar |
 | organism | `ActualizacionAviso` | Avisos del service worker (versión nueva / lista sin conexión) |
+| organism | `GraficoVolumenSemanal` | Columnas de volumen por semana (recharts, carga diferida) |
+| organism | `GraficoProgreso` | Línea de evolución por ejercicio: una medida a la vez, selector de ejercicio |
+| organism | `RecordsList` | Récords personales con marca "Nuevo" |
 | template | `MainLayout` | Cabecera + contenido + `BottomNav` (padding para safe-area) |
 | template | `AuthLayout` | Columna centrada para /login y /register |
 
@@ -101,6 +109,11 @@ Al crear un componente:
 - **Cronómetros y números grandes:** `text-6xl font-bold tabular-nums`, calculados contra una hora de fin (no sumando ticks).
 - **Estados obligatorios en toda pantalla con datos:** cargando (`Spinner`), error (`Alert` + botón "Reintentar"), vacío (`EmptyState` con la siguiente acción) y contenido.
 - **Tarjetas navegables:** toda la tarjeta es el enlace (`min-h-16`), con `ChevronRight` como pista.
+- **Gráficos** (sigue además la skill `dataviz`): colores de `src/lib/coloresGrafico.ts` (marca lime-600 validada para
+  fondo oscuro; el lime-400 de la UI no se usa en marcas de datos). Una serie = sin leyenda (el título la nombra).
+  Nunca dos ejes Y: otra medida va en otro gráfico o con un selector. Barras ≤ 24 px con extremo redondeado de 4 px;
+  líneas de 2 px con puntos de 8 px y anillo de la superficie; rejilla hairline. Siempre tooltip y `TablaGrafico`.
+  recharts se importa con `lazy()` para no engordar el bundle principal.
 - **Modales:** siempre `Sheet` (nunca un `div` posicionado a mano). Un `Sheet` que contiene su propio buscador o formulario se renderiza **fuera** de cualquier `<form>` padre, para que Enter no envíe el formulario de atrás.
 - **Ajustes numéricos sin teclado** (objetivos, cantidades acotadas): `ContadorField`. Para valores medidos (peso real levantado) usa `FormField` con `inputMode`.
 - **Iconos:** `lucide-react`, `size-5` en botones, `size-6` en navegación e `IconButton`, siempre `aria-hidden` si hay texto al lado.

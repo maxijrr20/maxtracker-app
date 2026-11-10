@@ -1,0 +1,90 @@
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+
+import type { VolumenSemanal } from '../../api/types'
+import { COLOR_GRAFICO } from '../../lib/coloresGrafico'
+import { fechaCorta, formatoKg, formatoKgCompacto } from '../../lib/formato'
+import { Card } from '../atoms/Card'
+import { Titulo } from '../atoms/Typography'
+import { TablaGrafico } from '../molecules/TablaGrafico'
+import { TooltipGrafico } from '../molecules/TooltipGrafico'
+
+interface Punto {
+  semana: string
+  volumen: number
+  sesiones: number
+}
+
+/**
+ * Volumen (kg) por semana: columnas de una sola serie (sin leyenda: el título dice qué es), de 24 px como máximo,
+ * extremo redondeado de 4 px y base recta. Tooltip por columna y tabla equivalente.
+ */
+export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }) {
+  const datos: Punto[] = semanas.map((s) => ({
+    semana: `Sem. ${fechaCorta(s.inicioSemana)}`,
+    volumen: s.volumenKg,
+    sesiones: s.sesiones,
+  }))
+
+  return (
+    <Card className="flex flex-col gap-3">
+      <div>
+        <Titulo nivel={2}>Volumen por semana</Titulo>
+        <p className="text-sm text-texto-suave">Peso × repeticiones de todas tus series, últimas {semanas.length} semanas.</p>
+      </div>
+
+      <div className="h-56" role="img" aria-label={`Gráfico de volumen semanal de las últimas ${semanas.length} semanas`}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={datos} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap={2}>
+            <CartesianGrid vertical={false} stroke={COLOR_GRAFICO.rejilla} />
+            <XAxis
+              dataKey="semana"
+              tickFormatter={(valor: string) => valor.replace('Sem. ', '')}
+              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              interval="preserveStartEnd"
+              minTickGap={16}
+            />
+            <YAxis
+              tickFormatter={formatoKgCompacto}
+              tick={{ fill: COLOR_GRAFICO.textoEje, fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              width={44}
+              allowDecimals={false}
+            />
+            <Tooltip
+              cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
+              content={({ active, payload }) => {
+                const punto = payload?.[0]?.payload as Punto | undefined
+                return (
+                  <TooltipGrafico
+                    activo={active}
+                    valor={punto ? formatoKg(punto.volumen) : undefined}
+                    etiqueta={punto?.semana}
+                    serie="volumen"
+                    detalle={punto ? `${punto.sesiones} ${punto.sesiones === 1 ? 'sesión' : 'sesiones'}` : undefined}
+                  />
+                )
+              }}
+            />
+            <Bar
+              dataKey="volumen"
+              fill={COLOR_GRAFICO.marca}
+              activeBar={{ fill: COLOR_GRAFICO.marcaActiva }}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={24}
+              isAnimationActive={false}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <TablaGrafico
+        titulo="Volumen por semana"
+        columnas={['Semana del', 'Volumen', 'Sesiones']}
+        filas={semanas.map((s) => [fechaCorta(s.inicioSemana), formatoKg(s.volumenKg), String(s.sesiones)])}
+      />
+    </Card>
+  )
+}

@@ -18,6 +18,8 @@ import { DescansoTimer } from '../components/organisms/DescansoTimer'
 import { EjercicioSelector } from '../components/organisms/EjercicioSelector'
 import { RegistrarSerieForm } from '../components/organisms/RegistrarSerieForm'
 import { SesionActivaCard } from '../components/organisms/SesionActivaCard'
+import { TarjetaAnalisisIa } from '../components/molecules/TarjetaAnalisisIa'
+import { useAnalisisIa } from '../hooks/useAnalisisIa'
 import { useCarga } from '../hooks/useCarga'
 import { claveEjercicio, type EjercicioElegido } from '../lib/ejercicioElegido'
 import { guardarPendientes, leerPendientes } from '../lib/ejerciciosPendientes'
@@ -109,6 +111,8 @@ export function EntrenamientoPage() {
   const [finalizando, setFinalizando] = useState(false)
   const [iniciandoLibre, setIniciandoLibre] = useState(false)
   const [errorAccion, setErrorAccion] = useState<string | null>(null)
+  // Al finalizar se pide automáticamente el análisis de la sesión (una vez; luego, a demanda).
+  const analisisIa = useAnalisisIa({ sesionId: datos?.sesion?.id })
 
   if (cargando) return <Spinner etiqueta="Buscando tu sesión…" />
 
@@ -216,6 +220,7 @@ export function EntrenamientoPage() {
     setErrorAccion(null)
     try {
       actualizar(await finalizarSesion(actual.id))
+      if (actual.series.length > 0) analisisIa.solicitar()
       setPendientes([])
     } catch (causa) {
       setErrorAccion(causa instanceof ApiError ? causa.message : 'No se pudo finalizar la sesión.')
@@ -257,6 +262,15 @@ export function EntrenamientoPage() {
       />
 
       {errorAccion && <Alert>{errorAccion}</Alert>}
+
+      {actual.finalizada && actual.series.length > 0 && (
+        <TarjetaAnalisisIa
+          {...analisisIa}
+          onSolicitar={analisisIa.solicitar}
+          descripcion="Recomendaciones del entrenador virtual para esta sesión."
+          textoBoton="Analizar esta sesión"
+        />
+      )}
 
       {enCurso && <DescansoTimer disparador={seriesRegistradas} />}
 

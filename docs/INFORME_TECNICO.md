@@ -21,7 +21,7 @@ Arquitectura desacoplada: cliente (PWA), API REST e infraestructura de datos son
 [ PWA React (Vercel) ] --HTTPS/JSON--> [ API Spring Boot (Render, Docker) ] --JDBC--> [ PostgreSQL (Supabase) ]
                                                   |
                                                   +--HTTPS--> [ API pública wger ]  (catálogo, con caché)
-                                                  +--HTTPS--> [ Groq / Gemini ]      (análisis IA, Semana 3)
+                                                  +--HTTPS--> [ Gemini (Google AI) ]  (análisis IA, Día 7)
 ```
 
 | Capa | Tecnología | Notas |
@@ -125,7 +125,7 @@ rutina  1──* sesion_entrenamiento (opcional)
 | `EjercicioRepository` | `findByWgerId` (copia local de wger), `findByUsuarioIdOrderByNombreAsc` (personalizados del usuario), `findAccesible(id, usuarioId)` (copia de wger o personalizado propio) |
 | `RutinaRepository` | `findByUsuarioIdOrderByNombreAsc`; `findByIdAndUsuarioId`; `findConEjerciciosByIdAndUsuarioId` (con `@EntityGraph`: rutina + ejercicios en una consulta) |
 | `SesionEntrenamientoRepository` | `findByUsuarioIdOrderByFechaDescIdDesc` (historial paginado); `findConSeriesByIdAndUsuarioId` (con `@EntityGraph`) |
-| `SerieRegistroRepository` | `findHistorial(usuarioId, ejercicioId)`: series de un ejercicio en orden cronológico, base de las métricas del Día 7 |
+| `SerieRegistroRepository` | `findHistorial(usuarioId, ejercicioId)`; proyecciones `SerieHistorial` para métricas y análisis (`findHistorialCompleto`, `findHistorialDesde`, `findHistorialDeEjercicio`, `findHistorialDeEjerciciosDesde`) |
 
 `RutinaEjercicio` no tiene repositorio propio: se gestiona siempre a través de `Rutina`. Las consultas por `id` incluyen el `usuarioId` para que un usuario no pueda leer datos de otro.
 
@@ -183,11 +183,40 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | POST | `/api/v1/sesiones/{id}/finalizar` | 3 | Finaliza la sesión (409 si ya lo estaba) |
 | POST | `/api/v1/sesiones/{id}/series` | 3 | Registra una serie: `wgerId` **o** `ejercicioId`, `pesoKg` (0–9999,99), `repeticiones` (1–999), `rir` (0–10, opcional). 201; 409 si la sesión está finalizada |
 | DELETE | `/api/v1/sesiones/{id}/series/{serieId}` | 3 | Quita una serie (204; 409 si la sesión está finalizada) |
-| GET | `/api/v1/progreso/{ejercicioId}` | 7 | Serie temporal: peso máx., volumen, 1RM estimado |
-| POST | `/api/v1/analisis` | 7 | Análisis IA del progreso |
+| GET | `/api/v1/metricas/resumen` | 7 | Volumen (Σ peso × reps), sesiones y series de la semana y el mes actuales y anteriores; volumen por semana (`semanas` 4–52, por defecto 12, incluidas las semanas vacías); récords personales |
+| GET | `/api/v1/metricas/ejercicios` | 7 | Ejercicios con series, del usado más recientemente al más antiguo |
+| GET | `/api/v1/metricas/ejercicios/{id}/progreso` | 7 | Un punto por sesión: peso máx., volumen y 1RM estimado (Epley). 404 si el ejercicio no es accesible |
+| POST | `/api/v1/analisis/rutina` | 7 | Análisis con IA (Gemini): sobrecarga progresiva por ejercicio, ajuste de RIR y sugerencias. Cuerpo opcional: `rutinaId` **o** `sesionId`, `dias` (7–90, por defecto 28). 422 sin series en el periodo; 429 + `Retry-After` si se pide otro antes de 20 s; 503 si la IA no está configurada o falla |
 | GET | `/actuator/health` | 1 | Health check (Render) |
 
 Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `timestamp`.
+
+### 5.1 Métricas y análisis con IA (Día 7)
+
+**Métricas.** Las consultas devuelven proyecciones planas (`SerieHistorial`: sesión, fecha, ejercicio, peso, reps, RIR) y los cálculos viven en `CalculadoraMetricas`, una clase de funciones puras (sin JPA, reloj ni Spring) probada con datos en memoria.
+
+* Volumen = Σ peso × repeticiones; las series con peso 0 (peso corporal) no suman volumen.
+* Semana de lunes a domingo, en la zona de `APP_ZONA_HORARIA`.
+* Récord por ejercicio = mayor peso; a igual peso, más repeticiones; se fecha la primera vez que se logró.
+* 1RM estimado con Epley: `peso × (1 + reps/30)`; con 1 repetición es el peso. Es una estimación: pierde precisión por encima de ~10 repeticiones.
+
+**Análisis con IA (Clean Architecture).**
+
+| Capa | Pieza | Responsabilidad |
+|---|---|---|
+| Controlador | `AnalisisController` | `POST /api/v1/analisis/rutina`, validación del cuerpo |
+| Caso de uso | `AnalisisService` → `IaAnalisisService` | Arma el historial desde las series del usuario (no lo recibe del cliente) y aplica el límite de frecuencia (`LimitadorAnalisis`) |
+| Puerto | `AsistenteEntrenamiento` (+ `ContextoAnalisis`, `RecomendacionIa`) | Contrato con el "entrenador virtual"; no sabe de Gemini |
+| Adaptador | `ia.gemini.GeminiAsistente` | `POST models/{modelo}:generateContent` con salida JSON por esquema; valida y acota la respuesta |
+
+* La lectura va en una transacción de solo lectura que termina **antes** de llamar a la IA, para no ocupar una conexión del pool (5) mientras el modelo responde.
+* El prompt se acota: como máximo 12 ejercicios y sus últimas 8 sesiones.
+* El 1RM inicial y final de cada ejercicio se precalcula y se le pasa al modelo.
+* **Privacidad:** en el plan gratuito, Google puede usar los datos para mejorar sus productos. Solo se envían ejercicios, fechas, pesos, repeticiones y RIR, nunca el email ni datos de la cuenta (lo verifica `AnalisisIntegrationTest`).
+* **Seguridad:** la clave va en la cabecera `x-goog-api-key` (nunca en la URL ni en los logs) y solo existe en el backend.
+* **Inyección de instrucciones:** los nombres de ejercicio pueden ser texto del usuario. Van como datos JSON y la instrucción de sistema pide ignorar instrucciones dentro de ellos.
+* **Robustez:** sin `GEMINI_API_KEY` la app arranca igual y el análisis responde 503. Cuota agotada (429 de Google), clave inválida, modelo retirado o JSON cortado → 503 con un mensaje claro. El modelo se cambia con `GEMINI_MODEL` (por defecto `gemini-3.5-flash-lite`).
+* `generateContent` es la API "legacy" de Gemini (sigue soportada); migrar a la Interactions API solo afectaría a `GeminiAsistente`.
 
 ## 6. Seguridad
 
@@ -254,7 +283,7 @@ Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `ti
 |---|---|---|
 | Asistente de código / arquitectura | Claude Pro | $19.990 CLP / mes |
 | Base de datos PostgreSQL | Supabase (plan gratuito) | $0 |
-| API de análisis IA | Groq Cloud / Gemini Flash (plan gratuito) | $0 |
+| API de análisis IA | Gemini (Google AI Studio, plan gratuito) | $0 |
 | Hosting frontend (PWA) | Vercel (Hobby) | $0 |
 | Hosting backend (API) | Render (plan gratuito, Docker) | $0 |
 | Catálogo de ejercicios | wger (API pública) | $0 |

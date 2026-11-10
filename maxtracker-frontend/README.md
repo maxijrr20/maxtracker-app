@@ -49,6 +49,15 @@ El backend (`GET /ejercicios`) pagina y filtra por categoría de wger, pero **no
 - "Tus ejercicios" (los de tus rutinas) aparece primero y se envía como `ejercicioId`; los del catálogo se envían
   como `wgerId` y el backend crea la copia local la primera vez.
 
+## Métricas y entrenador virtual (Día 7)
+
+- `/` muestra el volumen de la semana y del mes (con su variación), volumen por semana (12 semanas), evolución por
+  ejercicio (peso máximo, 1RM estimado o volumen) y récords personales. Datos de `GET /metricas/*`.
+- Gráficos con `recharts`, cargados con `lazy()` (no se descargan fuera del inicio). Cada gráfico tiene tooltip y
+  una tabla equivalente ("Ver como tabla").
+- `TarjetaAnalisisIa` pide `POST /analisis/rutina` **a demanda** en el detalle de una rutina, y automáticamente al
+  finalizar una sesión con series. La clave de Gemini vive solo en el backend.
+
 ## Entrenamiento libre
 
 `/entrenamiento` sin sesión en curso permite empezar sin rutina y agregar ejercicios con el buscador. El backend solo

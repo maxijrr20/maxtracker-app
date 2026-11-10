@@ -132,3 +132,96 @@ export interface EjercicioCatalogo {
   equipamiento: string[]
   imagenUrl: string | null
 }
+
+// --- Métricas (/metricas) ---
+
+/** Totales de un periodo. Volumen = Σ peso × repeticiones (kg). */
+export interface Periodo {
+  volumenKg: number
+  sesiones: number
+  series: number
+}
+
+export interface VolumenSemanal {
+  /** Lunes de la semana (YYYY-MM-DD). */
+  inicioSemana: string
+  volumenKg: number
+  sesiones: number
+}
+
+export interface RecordPersonal {
+  ejercicioId: number
+  wgerId: number | null
+  ejercicioNombre: string
+  categoria: string | null
+  pesoMaxKg: number
+  repeticiones: number
+  /** Primera vez que se logró. */
+  fecha: string
+  /** Mejor 1RM estimado del historial (Epley). */
+  unoRmEstimadoKg: number
+}
+
+export interface ResumenMetricas {
+  semanaActual: Periodo
+  semanaAnterior: Periodo
+  mesActual: Periodo
+  mesAnterior: Periodo
+  volumenSemanal: VolumenSemanal[]
+  records: RecordPersonal[]
+}
+
+export interface EjercicioConHistorial {
+  ejercicioId: number
+  wgerId: number | null
+  ejercicioNombre: string
+  categoria: string | null
+  series: number
+  ultimaFecha: string
+}
+
+export interface PuntoProgreso {
+  sesionId: number
+  fecha: string
+  pesoMaxKg: number
+  volumenKg: number
+  unoRmEstimadoKg: number
+  series: number
+}
+
+export interface ProgresoEjercicio {
+  ejercicioId: number
+  ejercicioNombre: string
+  puntos: PuntoProgreso[]
+}
+
+// --- Análisis con IA (/analisis/rutina) ---
+
+export type Tendencia = 'PROGRESA' | 'ESTANCADO' | 'RETROCEDE' | 'SIN_DATOS_SUFICIENTES'
+
+export interface AnalisisEjercicio {
+  ejercicio: string
+  tendencia: Tendencia
+  observacion: string | null
+  sugerencia: string | null
+}
+
+export interface AnalisisRutina {
+  alcance: string
+  resumen: string
+  ejercicios: AnalisisEjercicio[]
+  ajusteRir: string | null
+  sugerencias: string[]
+  dias: number
+  seriesAnalizadas: number
+  modelo: string
+  generadoEn: string
+}
+
+/** Como máximo uno de rutinaId o sesionId; sin ninguno, todo lo entrenado en el periodo. */
+export interface SolicitudAnalisis {
+  rutinaId?: number
+  sesionId?: number
+  /** 7–90, por defecto 28. */
+  dias?: number
+}
