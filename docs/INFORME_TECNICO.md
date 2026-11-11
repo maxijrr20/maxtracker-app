@@ -257,7 +257,10 @@ Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `ti
 ### Semana 3 — Métricas, IA y Despliegue
 
 * **Día 7:** Endpoint de progreso (peso máx., volumen, 1RM estimado con fórmula de Epley), gráficas con Recharts y servicio de IA (Groq/Gemini) con su API key solo en el backend. *Commit:* `feat: metricas de progreso, graficas e integracion de ia`
-* **Día 8:** Despliegue: backend en Render (Dockerfile ya incluido), frontend en Vercel, variables de entorno (`VITE_API_URL`, `CORS_ALLOWED_ORIGINS`, credenciales de BD, `JWT_SECRET`). *Commit:* `ci: configurar despliegue y variables de produccion`
+* **Día 8:** Despliegue: backend en Render (Docker, plan gratuito, región Oregón como Supabase) definido en `render.yaml` (Blueprint), frontend en Vercel (Root Directory `maxtracker-frontend`), variables de entorno (`VITE_API_URL`, `CORS_ALLOWED_ORIGINS`, credenciales de BD, `JWT_SECRET` aleatorio) y registro cerrado en producción (`AUTH_REGISTRO_HABILITADO=false`). ✅
+  * API: `https://maxtracker-api.onrender.com` (health en `/actuator/health`)
+  * App: `https://maxtracker-nine.vercel.app`
+  *Commits:* `ci: configurar despliegue y variables de produccion` · `ci: agregar blueprint de render para el backend`
 * **Día 9:** README profesional (badges, diagrama, capturas, decisiones técnicas). *Commit:* `docs: actualizar readme profesional del proyecto`
 
 ### Semana 4 — Holgura y mejoras opcionales
