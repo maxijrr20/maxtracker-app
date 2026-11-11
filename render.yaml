@@ -1,0 +1,45 @@
+# =========================================================
+# MaxTracker — Blueprint de Render (backend)
+# Render > New > Blueprint > este repositorio.
+# Los valores con "sync: false" se piden al crear el Blueprint y no se guardan en el repo.
+# =========================================================
+services:
+  - type: web
+    name: maxtracker-api
+    runtime: docker
+    plan: free
+    # Misma región que Supabase (aws us-west-2 = Oregón): menos latencia entre la API y la BD
+    region: oregon
+    dockerfilePath: ./maxtracker-backend/Dockerfile
+    dockerContext: ./maxtracker-backend
+    healthCheckPath: /actuator/health
+    # Solo redespliega cuando cambia el backend
+    buildFilter:
+      paths:
+        - maxtracker-backend/**
+    envVars:
+      # Supabase, Session pooler (IPv4): jdbc:postgresql://aws-1-<region>.pooler.supabase.com:5432/postgres?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "5"
+      # Render genera un valor aleatorio de 256 bits (base64); nunca sale del panel
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: PT12H
+      # URL del frontend en Vercel, sin "/" final (varias separadas por coma)
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      # Poner en "false" después de crear tu cuenta
+      - key: AUTH_REGISTRO_HABILITADO
+        value: "true"
+      - key: APP_ZONA_HORARIA
+        value: America/Santiago
+      # Opcional: sin clave, el análisis con IA responde 503 y el resto funciona
+      - key: GEMINI_API_KEY
+        sync: false
