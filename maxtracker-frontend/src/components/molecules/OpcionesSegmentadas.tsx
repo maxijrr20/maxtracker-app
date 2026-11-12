@@ -24,7 +24,7 @@ export interface OpcionesSegmentadasProps<T extends string | number> {
 
 /**
  * Selector de una opción entre pocas, sobre radios nativos ocultos: flechas del teclado, lector de pantalla y
- * formularios funcionan solos. Cada opción mide al menos 48 px; la elegida brilla en lima.
+ * formularios funcionan solos. Cada opción mide al menos 48 px; la elegida se marca en cian tenue.
  */
 export function OpcionesSegmentadas<T extends string | number>({
   etiqueta,
@@ -44,7 +44,7 @@ export function OpcionesSegmentadas<T extends string | number>({
       <div
         className={cx(
           disposicion === 'fila'
-            ? 'grid gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80 p-1'
+            ? 'grid gap-1 rounded-2xl border border-linea bg-casilla p-1'
             : 'flex flex-col gap-2',
         )}
         style={disposicion === 'fila' ? { gridTemplateColumns: `repeat(${opciones.length}, minmax(0, 1fr))` } : undefined}
@@ -59,16 +59,16 @@ export function OpcionesSegmentadas<T extends string | number>({
                 'relative flex cursor-pointer select-none transition-[transform,background-color,color,border-color] duration-150 active:scale-[0.98]',
                 'has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-acento',
                 disposicion === 'fila'
-                  ? 'min-h-tactil items-center justify-center rounded-xl px-2 text-center font-semibold'
-                  : 'min-h-14 items-start gap-3 rounded-xl border p-3',
+                  ? 'min-h-tactil items-center justify-center rounded-2xl px-2 text-center font-semibold'
+                  : 'min-h-14 items-start gap-3 rounded-2xl border p-3',
                 disposicion === 'fila' &&
                   (elegida
-                    ? 'bg-zinc-100 text-zinc-950'
+                    ? 'bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40'
                     : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto'),
                 disposicion === 'lista' &&
                   (elegida
-                    ? 'border-zinc-500 bg-white/[0.05]'
-                    : 'border-zinc-800 bg-zinc-950/40 hover:border-zinc-700'),
+                    ? 'border-acento/50 bg-acento/[0.06]'
+                    : 'border-linea bg-casilla/60 hover:border-texto-tenue'),
               )}
             >
               <input
@@ -86,8 +86,8 @@ export function OpcionesSegmentadas<T extends string | number>({
                   {Icono && (
                     <span
                       className={cx(
-                        'grid size-9 shrink-0 place-items-center rounded-lg transition-colors duration-150',
-                        elegida ? 'bg-zinc-100 text-zinc-950' : 'bg-white/[0.05] text-zinc-400',
+                        'grid size-9 shrink-0 place-items-center rounded-xl transition-colors duration-150',
+                        elegida ? 'bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40' : 'bg-white/[0.05] text-texto-suave',
                       )}
                     >
                       <Icono aria-hidden className="size-5" />
@@ -102,7 +102,7 @@ export function OpcionesSegmentadas<T extends string | number>({
                     aria-hidden
                     className={cx(
                       'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 transition-colors duration-150',
-                      elegida ? 'border-acento' : 'border-zinc-600',
+                      elegida ? 'border-acento' : 'border-texto-tenue',
                     )}
                   >
                     {elegida && <span className="size-2.5 rounded-full bg-acento" />}

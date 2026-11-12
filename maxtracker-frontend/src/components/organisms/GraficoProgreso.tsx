@@ -54,7 +54,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
     <Card className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
         <h2 className="rotulo">Evolución por ejercicio</h2>
-        <p className="text-xs text-zinc-500">{MEDIDAS[medida].descripcion}</p>
+        <p className="text-xs text-texto-suave">{MEDIDAS[medida].descripcion}</p>
       </div>
 
       {ejercicios.length === 0 ? (
@@ -81,7 +81,7 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                 </option>
               ))}
             </Select>
-            <div role="group" aria-label="Medida" className="grid grid-cols-3 gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80 p-1">
+            <div role="group" aria-label="Medida" className="grid grid-cols-3 gap-1 rounded-2xl border border-linea bg-casilla p-1">
               {(Object.keys(MEDIDAS) as Medida[]).map((m) => (
                 <button
                   key={m}
@@ -89,8 +89,8 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                   aria-pressed={medida === m}
                   onClick={() => setMedida(m)}
                   className={cx(
-                    'min-h-tactil rounded-lg text-sm font-semibold transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
-                    medida === m ? 'bg-zinc-100 text-zinc-950' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
+                    'min-h-tactil rounded-xl text-sm font-semibold transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
+                    medida === m ? 'bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
                   )}
                 >
                   {MEDIDAS[m].etiqueta}
@@ -99,16 +99,16 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
             </div>
           </div>
 
-          {/* Cifras clave (la "etiqueta directa" de la línea): la última y la mejor; la mejor es el PR (foco lima). */}
+          {/* Cifras clave (la "etiqueta directa" de la línea): la última y la mejor; la mejor es el PR (coral). */}
           {ultimo && mejor && (
-            <dl className="grid grid-cols-2 divide-x divide-zinc-800/60 rounded-xl bg-white/[0.03] py-2">
+            <dl className="grid grid-cols-2 divide-x divide-linea-suave rounded-2xl bg-white/[0.03] py-2">
               <div className="flex flex-col gap-1 px-3">
                 <dt className="rotulo">Última · {fechaCorta(ultimo.fecha)}</dt>
                 <dd className="cifra text-2xl text-texto">{formatoPeso(ultimo[medida])}</dd>
               </div>
               <div className="flex flex-col gap-1 px-3">
                 <dt className="rotulo">Mejor · {fechaCorta(mejor.fecha)}</dt>
-                <dd className="cifra text-2xl text-acento">{formatoPeso(mejor[medida])}</dd>
+                <dd className="cifra text-2xl text-record">{formatoPeso(mejor[medida])}</dd>
               </div>
             </dl>
           )}
@@ -162,11 +162,11 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                   <Line
                     type="linear"
                     dataKey={medida}
-                    stroke={COLOR_GRAFICO.marca}
+                    stroke={COLOR_GRAFICO.linea}
                     strokeWidth={2}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    // Puntos en gris; el del mejor valor (PR) en lima.
+                    // Puntos cian; el del mejor valor (PR) en coral y más grande.
                     dot={(props: { cx?: number; cy?: number; index?: number; payload?: PuntoProgreso }) => {
                       const esMejor = props.payload?.sesionId === mejor?.sesionId
                       return (
@@ -175,13 +175,13 @@ export function GraficoProgreso({ ejercicios, ejercicioId, onCambiarEjercicio, p
                           cx={props.cx}
                           cy={props.cy}
                           r={esMejor ? 5 : 4}
-                          fill={esMejor ? COLOR_GRAFICO.foco : COLOR_GRAFICO.marca}
+                          fill={esMejor ? COLOR_GRAFICO.record : COLOR_GRAFICO.linea}
                           stroke={COLOR_GRAFICO.superficie}
                           strokeWidth={2}
                         />
                       )
                     }}
-                    activeDot={{ r: 6, fill: COLOR_GRAFICO.marcaActiva, stroke: COLOR_GRAFICO.superficie, strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: COLOR_GRAFICO.lineaActiva, stroke: COLOR_GRAFICO.superficie, strokeWidth: 2 }}
                     isAnimationActive={false}
                   />
                 </LineChart>

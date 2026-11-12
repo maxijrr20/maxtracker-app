@@ -234,7 +234,7 @@ export function EntrenamientoPage() {
   }
 
   const ejercicios = agrupar(actual, pendientes)
-  // Ejercicio actual: el primero que no completó su objetivo (o sin series). Único con acción primaria y barra lima.
+  // Ejercicio actual: el primero que no completó su objetivo (o sin series). Único con acción primaria y barra cian.
   const claveActual = actual.finalizada
     ? undefined
     : (
@@ -312,7 +312,7 @@ export function EntrenamientoPage() {
                   enCurso={ejercicio.clave === claveActual}
                 >
                   {ejercicio.series.length > 0 && (
-                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col divide-y divide-zinc-800/60">
+                    <ul aria-label={`Series de ${ejercicio.nombre}`} className="flex flex-col divide-y divide-linea-suave">
                       {ejercicio.series.map((serie) => (
                         <SerieRow key={serie.id} serie={serie} onEliminar={enCurso ? quitarSerie : undefined} />
                       ))}

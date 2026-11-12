@@ -11,9 +11,9 @@ export interface EmptyStateProps {
 /** Estado vacío compacto: ícono chico, una línea de título, la explicación y la siguiente acción. */
 export function EmptyState({ icono: Icono, titulo, descripcion, accion }: EmptyStateProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-white/[0.03] p-3 ring-1 ring-inset ring-white/[0.06]">
+    <div className="flex flex-col gap-3 rounded-2xl bg-white/[0.03] p-3 ring-1 ring-inset ring-white/[0.06]">
       <div className="flex items-start gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/[0.05] text-zinc-400">
+        <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-white/[0.05] text-texto-suave">
           <Icono aria-hidden className="size-5" />
         </span>
         <div className="flex min-w-0 flex-col gap-0.5">

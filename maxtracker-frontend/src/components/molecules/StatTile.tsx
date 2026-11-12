@@ -30,7 +30,7 @@ export function StatTile({ etiqueta, valor, unidad, variacion, referencia, detal
       <span className="rotulo truncate">{etiqueta}</span>
       <span className="whitespace-nowrap">
         <span className="cifra text-3xl text-texto">{valor}</span>
-        {unidad && <span className="ml-1 text-xs font-semibold text-zinc-500">{unidad}</span>}
+        {unidad && <span className="ml-1 text-xs font-semibold text-texto-suave">{unidad}</span>}
       </span>
       {variacion !== undefined && (
         <Badge tono={sube ? 'exito' : 'neutro'} mono className="self-start">

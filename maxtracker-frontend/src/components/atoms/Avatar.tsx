@@ -8,14 +8,14 @@ const TAMANOS: Record<TamanoAvatar, string> = {
   lg: 'size-14 text-xl',
 }
 
-/** Iniciales sobre degradado zinc con un anillo lima fino (decorativo: el texto cercano dice de quién es). */
+/** Iniciales sobre degradado índigo con un anillo cian (decorativo: el texto cercano dice de quién es). */
 export function Avatar({ email, tamano = 'sm', className }: { email: string | null; tamano?: TamanoAvatar; className?: string }) {
   return (
     <span
       aria-hidden
       className={cx(
-        'grid shrink-0 select-none place-items-center rounded-full bg-linear-to-b from-zinc-700 to-zinc-900',
-        'font-mono font-black tracking-tight text-zinc-100 ring-1 ring-lime-400/50 shadow-elevada',
+        'grid shrink-0 select-none place-items-center rounded-full bg-linear-to-br from-acento-profundo to-superficie-alta',
+        'font-mono font-bold tracking-tight text-texto ring-2 ring-acento/40 shadow-elevada',
         TAMANOS[tamano],
         className,
       )}

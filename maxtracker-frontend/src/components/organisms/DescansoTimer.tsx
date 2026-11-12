@@ -8,6 +8,9 @@ import { IconButton } from '../atoms/IconButton'
 
 const PRESETS_SEGUNDOS = [30, 60, 90, 120, 180] as const
 
+const RADIO_ANILLO = 52
+const CIRCUNFERENCIA = 2 * Math.PI * RADIO_ANILLO
+
 export interface DescansoTimerProps {
   /** Cambiar este valor (p. ej. al registrar una serie) reinicia el descanso con la duración elegida. */
   disparador?: number
@@ -35,6 +38,9 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
   const restante = corriendo
     ? Math.max(0, Math.ceil((finEn - ahora) / 1000))
     : (pausadoCon ?? duracion)
+  // Fracción del anillo que queda por recorrer (con decimales para que se vacíe de forma continua).
+  const restanteExacto = corriendo ? Math.max(0, (finEn - ahora) / 1000) : restante
+  const fraccion = duracion > 0 ? Math.min(1, restanteExacto / duracion) : 0
 
   // Reinicio externo (serie registrada).
   useEffect(() => {
@@ -95,16 +101,51 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
         <IconButton icono={RotateCcw} etiqueta="Reiniciar descanso" onClick={reiniciar} className="-my-2 -mr-2" />
       </div>
 
-      {/* Único lima mientras corre (estado vivo). */}
-      <p
-        role="timer"
-        aria-live={restante === 0 || !corriendo ? 'polite' : 'off'}
-        className={cx('cifra text-center text-6xl transition-colors duration-150', corriendo ? 'text-acento' : 'text-texto')}
-      >
-        {formatear(restante)}
-      </p>
+      {/*
+        Anillo de progreso compacto con la acción al lado: se vacía mientras corre (cian = estado vivo); detenido,
+        queda lleno y apagado. Compacto para que el ejercicio actual siga visible sin scroll en la pantalla de entrenamiento.
+      */}
+      <div className="flex items-center gap-4">
+        <div className="relative grid size-28 shrink-0 place-items-center">
+          <svg aria-hidden viewBox="0 0 120 120" className="absolute inset-0 size-full -rotate-90">
+            <circle cx="60" cy="60" r={RADIO_ANILLO} fill="none" strokeWidth="10" className="stroke-casilla" />
+            <circle
+              cx="60"
+              cy="60"
+              r={RADIO_ANILLO}
+              fill="none"
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeDasharray={CIRCUNFERENCIA}
+              strokeDashoffset={CIRCUNFERENCIA * (1 - fraccion)}
+              className={cx(
+                'transition-[stroke-dashoffset,stroke] duration-300 ease-linear',
+                corriendo ? 'stroke-acento' : 'stroke-texto-tenue',
+              )}
+            />
+          </svg>
+          <p role="timer" aria-live={restante === 0 || !corriendo ? 'polite' : 'off'} className="relative flex flex-col items-center gap-0.5">
+            <span className={cx('cifra text-3xl transition-colors duration-150', corriendo ? 'text-texto' : 'text-texto-medio')}>
+              {formatear(restante)}
+            </span>
+            <span className="text-xs text-texto-suave">{corriendo ? 'descansando' : pausadoCon !== null ? 'en pausa' : 'listo'}</span>
+          </p>
+        </div>
 
-      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-5 gap-1 rounded-xl border border-zinc-800 bg-zinc-950/80 p-1">
+        <div className="flex min-w-0 flex-1">
+          {corriendo ? (
+            <Button variante="secundario" anchoCompleto icono={Pause} onClick={pausar}>
+              Pausar
+            </Button>
+          ) : (
+            <Button variante="secundario" anchoCompleto icono={Play} onClick={iniciar}>
+              {pausadoCon !== null ? 'Reanudar' : 'Iniciar'}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div role="group" aria-label="Duración del descanso" className="grid grid-cols-5 gap-1 rounded-2xl border border-linea bg-casilla p-1">
         {PRESETS_SEGUNDOS.map((segundos) => (
           <button
             key={segundos}
@@ -112,24 +153,14 @@ export function DescansoTimer({ disparador, duracionInicial = 90 }: DescansoTime
             aria-pressed={duracion === segundos}
             onClick={() => elegir(segundos)}
             className={cx(
-              'min-h-tactil rounded-lg font-mono text-sm font-bold tabular-nums transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
-              duracion === segundos ? 'bg-zinc-100 text-zinc-950' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
+              'min-h-tactil rounded-xl font-mono text-sm font-bold tabular-nums transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
+              duracion === segundos ? 'bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40' : 'text-texto-suave hover:bg-white/[0.04] hover:text-texto',
             )}
           >
             {formatear(segundos)}
           </button>
         ))}
       </div>
-
-      {corriendo ? (
-        <Button variante="secundario" anchoCompleto icono={Pause} onClick={pausar}>
-          Pausar
-        </Button>
-      ) : (
-        <Button variante="secundario" anchoCompleto icono={Play} onClick={iniciar}>
-          {pausadoCon !== null ? 'Reanudar' : 'Iniciar descanso'}
-        </Button>
-      )}
     </Card>
   )
 }

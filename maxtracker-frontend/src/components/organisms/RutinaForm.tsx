@@ -137,7 +137,7 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
           <h2 id="titulo-ejercicios-rutina" className="rotulo">
             Ejercicios
           </h2>
-          <span className="font-mono text-xs font-bold tabular-nums text-zinc-500">
+          <span className="font-mono text-xs font-bold tabular-nums text-texto-suave">
             {items.length}/{MAX_EJERCICIOS}
           </span>
         </div>
@@ -154,7 +154,7 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
               <li key={item.clave}>
                 <Card className="flex flex-col gap-3">
                   <div className="flex items-start gap-2">
-                    <span className="cifra grid size-tactil shrink-0 place-items-center rounded-xl bg-white/[0.04] text-xl text-zinc-500">
+                    <span className="cifra grid size-tactil shrink-0 place-items-center rounded-2xl bg-white/[0.04] text-xl text-texto-suave">
                       {indice + 1}
                     </span>
                     <div className="flex min-w-0 flex-1 flex-col pt-1">

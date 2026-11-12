@@ -36,18 +36,18 @@ export function RecordsList({ records }: RecordsListProps) {
         />
       ) : (
         <>
-          <ul className="flex flex-col divide-y divide-zinc-800/60">
+          <ul className="flex flex-col divide-y divide-linea-suave">
             {visibles.map((record) => {
-              // PR reciente = punto de foco (lima); los demás récords, en neutro.
+              // PR reciente = coral (color exclusivo de los récords); los demás, en neutro.
               const reciente = aFecha(record.fecha).getTime() >= limiteNuevo
               return (
                 <li key={record.ejercicioId} className="flex min-h-14 items-center gap-3 py-1.5">
-                  <Trophy aria-hidden className={reciente ? 'size-5 shrink-0 text-acento' : 'size-5 shrink-0 text-zinc-600'} />
+                  <Trophy aria-hidden className={reciente ? 'size-5 shrink-0 text-record' : 'size-5 shrink-0 text-texto-tenue'} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="flex items-center gap-2">
                       <span className="truncate font-semibold">{record.ejercicioNombre}</span>
                       {reciente && (
-                        <Badge tono="acento" mono>
+                        <Badge tono="record" mono>
                           PR
                         </Badge>
                       )}
@@ -57,10 +57,10 @@ export function RecordsList({ records }: RecordsListProps) {
                     </span>
                   </div>
                   <span className="shrink-0 text-right">
-                    <span className={reciente ? 'cifra block text-xl text-acento' : 'cifra block text-xl text-texto'}>
+                    <span className={reciente ? 'cifra block text-xl text-record' : 'cifra block text-xl text-texto'}>
                       {formatoPeso(record.pesoMaxKg)}
                     </span>
-                    <span className="block font-mono text-xs font-bold text-zinc-500">×{record.repeticiones}</span>
+                    <span className="block font-mono text-xs font-bold text-texto-suave">×{record.repeticiones}</span>
                   </span>
                 </li>
               )

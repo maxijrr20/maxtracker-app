@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#09090b"/>
-  <g fill="#a3e635">
-    <rect x="10" y="22" width="8" height="20" rx="2"/>
-    <rect x="46" y="22" width="8" height="20" rx="2"/>
-    <rect x="18" y="27" width="5" height="10" rx="1.5"/>
-    <rect x="41" y="27" width="5" height="10" rx="1.5"/>
-    <rect x="23" y="30" width="18" height="4" rx="1"/>
-  </g>
+  <defs>
+    <linearGradient id="marca" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#marca)"/>
+  <path transform="translate(32 32) scale(1.75) translate(-12 -12)" fill="none" stroke="#062a33" stroke-width="2.6"
+    stroke-linecap="round" stroke-linejoin="round"
+    d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>
 </svg>

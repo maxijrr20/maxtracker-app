@@ -26,7 +26,7 @@ export interface SesionActivaCardProps {
 
 /**
  * Tablero de la sesión: rótulo con fecha, título y badge flotante de estado; tiempo, series y volumen como cifras
- * en una franja con divisores. En curso es la superficie de foco (borde lima) de la pantalla.
+ * en una franja con divisores. En curso es la superficie de foco (borde cian) de la pantalla.
  */
 export function SesionActivaCard({ sesion, nombreRutina, accion }: SesionActivaCardProps) {
   const { desdeKg, unidad } = usePeso()
@@ -63,13 +63,13 @@ export function SesionActivaCard({ sesion, nombreRutina, accion }: SesionActivaC
         <h2 className="truncate text-lg font-black tracking-tight">{nombreRutina ?? 'Entrenamiento libre'}</h2>
       </div>
 
-      <dl className="grid grid-cols-3 divide-x divide-zinc-800/60 rounded-xl bg-white/[0.03] py-2">
+      <dl className="grid grid-cols-3 divide-x divide-linea-suave rounded-2xl bg-white/[0.03] py-2">
         {cifras.map((c) => (
           <div key={c.etiqueta} className="flex flex-col items-center gap-1 px-2">
             <dt className="rotulo">{c.etiqueta}</dt>
             <dd className="whitespace-nowrap">
               <span className="cifra text-2xl text-texto">{c.valor}</span>
-              {c.unidad && <span className="ml-0.5 text-xs font-semibold text-zinc-500">{c.unidad}</span>}
+              {c.unidad && <span className="ml-0.5 text-xs font-semibold text-texto-suave">{c.unidad}</span>}
             </dd>
           </div>
         ))}

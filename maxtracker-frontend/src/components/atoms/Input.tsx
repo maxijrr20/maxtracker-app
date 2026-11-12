@@ -13,13 +13,13 @@ export function Input({ invalido = false, className, ...resto }: InputProps) {
       aria-invalid={invalido || undefined}
       className={cx(
         // text-base (16 px) evita que iOS haga zoom al enfocar.
-        'min-h-tactil w-full rounded-xl border bg-zinc-950/80 px-3 text-base text-texto placeholder:text-zinc-600',
-        // Halo lima tenue al enfocar (el :focus-visible global sigue marcando el foco de teclado).
+        'min-h-tactil w-full rounded-2xl border bg-casilla px-3 text-base text-texto placeholder:text-texto-tenue',
+        // Halo cian tenue al enfocar (el :focus-visible global sigue marcando el foco de teclado).
         'transition-[border-color,box-shadow] duration-150 focus:outline-none focus:ring-1',
         'disabled:opacity-40',
         invalido
-          ? 'border-red-500/60 focus:ring-red-500/50'
-          : 'border-zinc-800 focus:border-lime-500/50 focus:ring-lime-500/50',
+          ? 'border-peligro/60 focus:ring-peligro/50'
+          : 'border-linea focus:border-acento/50 focus:ring-acento/50',
         className,
       )}
       {...resto}

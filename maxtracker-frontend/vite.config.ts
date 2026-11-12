@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const COLOR_FONDO = '#09090b' // zinc-950, igual que bg-fondo
+const COLOR_FONDO = '#0b1020' // azul noche, igual que bg-fondo
 
 // https://vite.dev/config/
 export default defineConfig({

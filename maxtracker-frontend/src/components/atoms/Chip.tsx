@@ -8,7 +8,7 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
 
 /**
  * Filtro alternable (p. ej. grupo muscular). 48 px de alto; el estado se anuncia con aria-pressed.
- * Activo en blanco (no lima: un filtro no es un punto de foco).
+ * Activo en cian tenue (selección), distinto del cian sólido de la acción primaria.
  */
 export function Chip({ activo, className, type = 'button', ...resto }: ChipProps) {
   return (
@@ -19,7 +19,7 @@ export function Chip({ activo, className, type = 'button', ...resto }: ChipProps
         'inline-flex min-h-tactil shrink-0 items-center rounded-full px-4 text-sm font-semibold',
         'transition-[transform,background-color,color] duration-150 active:scale-[0.98]',
         activo
-          ? 'bg-zinc-100 text-zinc-950'
+          ? 'bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40'
           : 'bg-white/[0.04] text-texto-suave ring-1 ring-inset ring-white/10 hover:bg-white/[0.08] hover:text-texto',
         className,
       )}

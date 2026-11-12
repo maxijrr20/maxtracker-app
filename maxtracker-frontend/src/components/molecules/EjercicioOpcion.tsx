@@ -23,10 +23,10 @@ export function EjercicioOpcion({ nombre, detalle, categoria, imagenUrl, onElegi
     <button
       type="button"
       onClick={onElegir}
-      className="relative flex min-h-14 w-full items-center gap-3 rounded-xl py-1.5 pl-3 pr-1 text-left transition-colors duration-150 hover:bg-white/[0.03] active:bg-white/[0.05]"
+      className="relative flex min-h-14 w-full items-center gap-3 rounded-2xl py-1.5 pl-3 pr-1 text-left transition-colors duration-150 hover:bg-white/[0.03] active:bg-white/[0.05]"
     >
       <span aria-hidden className={cx('absolute inset-y-2.5 left-0 w-0.5 rounded-full', claseGrupo(categoria))} />
-      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white">
+      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
         {conImagen ? (
           <img
             src={imagenUrl ?? undefined}
@@ -37,7 +37,7 @@ export function EjercicioOpcion({ nombre, detalle, categoria, imagenUrl, onElegi
             className="size-full object-contain"
           />
         ) : (
-          <span className="grid size-full place-items-center bg-zinc-800 text-zinc-500">
+          <span className="grid size-full place-items-center bg-linea text-texto-suave">
             <Dumbbell aria-hidden className="size-5" />
           </span>
         )}
@@ -46,7 +46,7 @@ export function EjercicioOpcion({ nombre, detalle, categoria, imagenUrl, onElegi
         <span className="truncate font-semibold">{nombre}</span>
         {detalle && <span className="truncate text-xs text-texto-suave">{detalle}</span>}
       </span>
-      <span className="grid size-tactil shrink-0 place-items-center text-zinc-500">
+      <span className="grid size-tactil shrink-0 place-items-center text-texto-suave">
         <Plus aria-hidden className="size-5" />
       </span>
     </button>

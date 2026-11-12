@@ -13,15 +13,15 @@ export interface TablaGraficoProps {
  */
 export function TablaGrafico({ titulo, columnas, filas }: TablaGraficoProps) {
   return (
-    <details className="group rounded-xl bg-white/[0.03] ring-1 ring-inset ring-white/[0.06]">
+    <details className="group rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/[0.06]">
       <summary className="flex min-h-tactil cursor-pointer list-none items-center justify-between gap-2 px-3 text-sm font-semibold text-texto-suave hover:text-texto [&::-webkit-details-marker]:hidden">
         Ver como tabla
         <ChevronDown aria-hidden className="size-5 transition-transform group-open:rotate-180" />
       </summary>
-      <div className="max-h-72 overflow-auto border-t border-zinc-800/60">
+      <div className="max-h-72 overflow-auto border-t border-linea-suave">
         <table className="w-full text-sm">
           <caption className="sr-only">{titulo}</caption>
-          <thead className="sticky top-0 bg-zinc-900 text-left text-texto-suave">
+          <thead className="sticky top-0 bg-superficie text-left text-texto-suave">
             <tr>
               {columnas.map((columna, i) => (
                 <th key={columna} scope="col" className={i === 0 ? 'px-4 py-2 font-medium' : 'px-4 py-2 text-right font-medium'}>
@@ -30,7 +30,7 @@ export function TablaGrafico({ titulo, columnas, filas }: TablaGraficoProps) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/60 font-mono font-bold">
+          <tbody className="divide-y divide-linea-suave font-mono font-bold">
             {filas.map((fila) => (
               <tr key={fila[0]}>
                 {fila.map((celda, i) =>

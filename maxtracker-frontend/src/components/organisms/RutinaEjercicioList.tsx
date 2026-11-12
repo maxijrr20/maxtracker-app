@@ -28,13 +28,13 @@ export function RutinaEjercicioList({ ejercicios }: { ejercicios: RutinaEjercici
     )
   }
   return (
-    <ol className="superficie borde-degradado flex flex-col divide-y divide-zinc-800/60 px-3 py-1">
+    <ol className="superficie borde-degradado flex flex-col divide-y divide-linea-suave px-3 py-1">
       {ejercicios.map((ejercicio) => {
         const objetivo = textoObjetivo(ejercicio.seriesObjetivo, ejercicio.repeticionesObjetivo)
         return (
           <li key={`${ejercicio.orden}-${ejercicio.ejercicioId}`} className="relative flex min-h-14 items-center gap-3 py-2 pl-3">
             <span aria-hidden className={cx('absolute inset-y-3 left-0 w-1 rounded-full', claseGrupo(ejercicio.categoria))} />
-            <span className="cifra w-6 shrink-0 text-lg text-zinc-500">{String(ejercicio.orden).padStart(2, '0')}</span>
+            <span className="cifra w-6 shrink-0 text-lg text-texto-suave">{String(ejercicio.orden).padStart(2, '0')}</span>
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-base font-bold leading-tight">{ejercicio.ejercicioNombre}</span>
               <span className="rotulo truncate">{ejercicio.categoria ?? 'Ejercicio'}</span>

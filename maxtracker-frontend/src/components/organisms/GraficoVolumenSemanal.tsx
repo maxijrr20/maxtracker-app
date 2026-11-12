@@ -30,10 +30,10 @@ export function GraficoVolumenSemanal({ semanas }: { semanas: VolumenSemanal[] }
     <Card className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="rotulo">Volumen por semana</h2>
-        <span className="text-xs text-zinc-500">Peso × reps · {semanas.length} sem.</span>
+        <span className="text-xs text-texto-suave">Peso × reps · {semanas.length} sem.</span>
       </div>
 
-      {/* Marcas en gris; la semana actual (foco) en lima. */}
+      {/* Marcas en gris azulado; la semana actual (foco) en cian. */}
       <div className="h-44" role="img" aria-label={`Gráfico de volumen semanal de las últimas ${semanas.length} semanas`}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={datos} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap={2}>

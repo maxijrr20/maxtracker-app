@@ -16,7 +16,7 @@ export interface RegistrarSerieFormProps {
   pesoInicial?: number
   repeticionesIniciales?: number
   onRegistrar: (serie: RegistrarSerieRequest) => Promise<void>
-  /** Ejercicio actual de la sesión: su botón es la acción primaria (lima); el resto, secundario. */
+  /** Ejercicio actual de la sesión: su botón es la acción primaria (cian); el resto, secundario. */
   destacado?: boolean
 }
 

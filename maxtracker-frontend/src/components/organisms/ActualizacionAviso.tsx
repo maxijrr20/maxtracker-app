@@ -26,7 +26,7 @@ export function ActualizacionAviso() {
     <div
       role="status"
       // Sobre la barra inferior en móvil; abajo a la derecha desde md.
-      className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-zinc-900/90 p-2 pl-3 shadow-elevada-alta ring-1 ring-inset ring-white/10 backdrop-blur-2xl md:inset-x-auto md:bottom-6 md:right-6"
+      className="fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-superficie p-2 pl-3 shadow-elevada-alta ring-1 ring-inset ring-white/10 backdrop-blur-2xl md:inset-x-auto md:bottom-6 md:right-6"
     >
       {hayVersionNueva ? (
         <>
@@ -37,7 +37,7 @@ export function ActualizacionAviso() {
         </>
       ) : (
         <p className="flex flex-1 items-center gap-2 text-sm">
-          <WifiOff aria-hidden className="size-5 shrink-0 text-zinc-400" />
+          <WifiOff aria-hidden className="size-5 shrink-0 text-texto-suave" />
           Lista para abrirse sin conexión.
         </p>
       )}

@@ -22,7 +22,7 @@ export function SerieRow({ serie, onEliminar, deshabilitada = false }: SerieRowP
 
   return (
     <li className="flex min-h-12 items-center gap-3">
-      <span className="cifra w-7 shrink-0 text-xl text-zinc-500">
+      <span className="cifra w-7 shrink-0 text-xl text-texto-suave">
         <span className="sr-only">Serie </span>
         {String(serie.numeroSerie).padStart(2, '0')}
       </span>
@@ -30,14 +30,14 @@ export function SerieRow({ serie, onEliminar, deshabilitada = false }: SerieRowP
       <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
         <span className="whitespace-nowrap">
           <span className="cifra text-2xl text-texto">{peso}</span>
-          <span className="ml-0.5 text-xs font-semibold text-zinc-500">{unidad}</span>
+          <span className="ml-0.5 text-xs font-semibold text-texto-suave">{unidad}</span>
         </span>
-        <span aria-hidden className="text-zinc-600">
+        <span aria-hidden className="text-texto-tenue">
           ×
         </span>
         <span className="whitespace-nowrap">
           <span className="cifra text-xl text-texto">{serie.repeticiones}</span>
-          <span className="ml-0.5 text-xs font-semibold text-zinc-500">reps</span>
+          <span className="ml-0.5 text-xs font-semibold text-texto-suave">reps</span>
         </span>
       </span>
       {serie.rir !== null && <RirBadge rir={serie.rir} />}

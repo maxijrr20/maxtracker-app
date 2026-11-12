@@ -88,7 +88,7 @@ export function DashboardPage() {
           ) : (
             <Card className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <Dumbbell aria-hidden className="size-5 shrink-0 text-zinc-500" />
+                <Dumbbell aria-hidden className="size-5 shrink-0 text-texto-suave" />
                 <div className="min-w-0">
                   <h2 className="text-base font-bold leading-tight">¿Listo para entrenar?</h2>
                   <p className="text-sm text-texto-suave">Elige una rutina o entrena libre.</p>
@@ -105,7 +105,7 @@ export function DashboardPage() {
             <h2 id="titulo-volumen" className="sr-only">
               Volumen de entrenamiento
             </h2>
-            <div className="grid grid-cols-2 divide-x divide-zinc-800/60">
+            <div className="grid grid-cols-2 divide-x divide-linea-suave">
               <StatTile
                 etiqueta="Semana"
                 valor={formatoEntero(desdeKg(datos.resumen.semanaActual.volumenKg))}
@@ -126,7 +126,7 @@ export function DashboardPage() {
                 detalle={detallePeriodo(datos.resumen.mesActual.sesiones, datos.resumen.mesActual.series)}
               />
             </div>
-            <p className="px-3 text-xs text-zinc-500">
+            <p className="px-3 text-xs text-texto-suave">
               Volumen = peso × reps. Los periodos en curso se comparan con periodos completos.
             </p>
           </Card>

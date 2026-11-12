@@ -1,11 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Fuente de los íconos PWA (pwa-assets.config.ts). Fondo a sangre: el ícono "maskable" lo recorta cada sistema. -->
-  <rect width="512" height="512" fill="#09090b"/>
-  <g fill="#a3e635">
-    <rect x="96" y="176" width="64" height="160" rx="16"/>
-    <rect x="352" y="176" width="64" height="160" rx="16"/>
-    <rect x="160" y="216" width="40" height="80" rx="12"/>
-    <rect x="312" y="216" width="40" height="80" rx="12"/>
-    <rect x="200" y="240" width="112" height="32" rx="8"/>
-  </g>
+  <!-- Fuente de los íconos PWA (pwa-assets.config.ts). Fondo a sangre: el ícono "maskable" lo recorta cada sistema;
+       el círculo (r 176) queda dentro de la zona segura (r 205). Línea de pulso: ícono Activity de lucide (ISC). -->
+  <defs>
+    <linearGradient id="marca" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="#0b1020"/>
+  <circle cx="256" cy="256" r="176" fill="url(#marca)"/>
+  <path transform="translate(256 256) scale(9.5) translate(-12 -12)" fill="none" stroke="#062a33" stroke-width="2.4"
+    stroke-linecap="round" stroke-linejoin="round"
+    d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>
 </svg>

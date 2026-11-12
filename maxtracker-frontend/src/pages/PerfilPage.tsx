@@ -23,13 +23,13 @@ function EncabezadoBloque({ icono: Icono, titulo, descripcion }: { icono: typeof
         <Icono aria-hidden className="size-4" />
         {titulo}
       </h2>
-      <p className="text-right text-xs text-zinc-500">{descripcion}</p>
+      <p className="text-right text-xs text-texto-suave">{descripcion}</p>
     </div>
   )
 }
 
 function Separador() {
-  return <hr className="border-zinc-800/60" />
+  return <hr className="border-linea-suave" />
 }
 
 function Ajuste({ children }: { children: ReactNode }) {

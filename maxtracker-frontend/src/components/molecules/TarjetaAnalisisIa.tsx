@@ -40,7 +40,7 @@ export function TarjetaAnalisisIa({
   return (
     <Card className="flex flex-col gap-3" aria-busy={cargando || undefined}>
       <div className="flex items-start gap-3">
-        <span className="grid size-tactil shrink-0 place-items-center rounded-xl bg-sky-400/15 text-sky-200">
+        <span className="grid size-tactil shrink-0 place-items-center rounded-2xl bg-acento-profundo/20 text-texto">
           <Sparkles aria-hidden className="size-6" />
         </span>
         <div className="flex min-w-0 flex-col">
@@ -51,7 +51,7 @@ export function TarjetaAnalisisIa({
 
       {cargando && (
         <p role="status" className="flex items-center gap-3 text-texto-suave">
-          <LoaderCircle aria-hidden className="size-5 animate-spin text-sky-300" />
+          <LoaderCircle aria-hidden className="size-5 animate-spin text-acento" />
           Analizando tus series… puede tardar unos segundos.
         </p>
       )}
@@ -69,7 +69,7 @@ export function TarjetaAnalisisIa({
                 {analisis.ejercicios.map((e, i) => {
                   const t = TENDENCIAS[e.tendencia] ?? TENDENCIAS.SIN_DATOS_SUFICIENTES
                   return (
-                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-xl bg-white/[0.03] px-3 py-2">
+                    <li key={`${e.ejercicio}-${i}`} className="flex flex-col gap-1 rounded-2xl bg-white/[0.03] px-3 py-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="font-semibold">{e.ejercicio}</span>
                         <Badge tono={t.tono}>
@@ -96,7 +96,7 @@ export function TarjetaAnalisisIa({
           {analisis.sugerencias.length > 0 && (
             <section aria-label="Sugerencias" className="flex flex-col gap-1">
               <h3 className="rotulo">Sugerencias</h3>
-              <ul className="flex list-disc flex-col gap-1 pl-5 text-sm marker:text-sky-300">
+              <ul className="flex list-disc flex-col gap-1 pl-5 text-sm marker:text-acento">
                 {analisis.sugerencias.map((s, i) => (
                   <li key={i}>{s}</li>
                 ))}

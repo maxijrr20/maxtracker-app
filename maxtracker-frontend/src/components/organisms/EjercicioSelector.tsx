@@ -209,7 +209,7 @@ export function EjercicioSelector({
             <h3 id="titulo-locales" className="rotulo">
               Tus ejercicios
             </h3>
-            <ul className="flex flex-col divide-y divide-zinc-800/60">
+            <ul className="flex flex-col divide-y divide-linea-suave">
               {localesFiltrados.map((e) => (
                 <li key={e.ejercicioId}>
                   <EjercicioOpcion
@@ -231,7 +231,7 @@ export function EjercicioSelector({
             <h3 id="titulo-catalogo" className="rotulo">
               Catálogo
             </h3>
-            <ul className="flex flex-col divide-y divide-zinc-800/60">
+            <ul className="flex flex-col divide-y divide-linea-suave">
               {catalogoFiltrado.map((e) => (
                 <li key={e.id}>
                   <EjercicioOpcion

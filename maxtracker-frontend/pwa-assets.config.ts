@@ -9,8 +9,8 @@ export default defineConfig({
   preset: {
     ...minimal2023Preset,
     // Relleno con el color de fondo de la app en lugar del blanco por defecto.
-    maskable: { ...minimal2023Preset.maskable, resizeOptions: { background: '#09090b' } },
-    apple: { ...minimal2023Preset.apple, resizeOptions: { background: '#09090b' } },
+    maskable: { ...minimal2023Preset.maskable, resizeOptions: { background: '#0b1020' } },
+    apple: { ...minimal2023Preset.apple, resizeOptions: { background: '#0b1020' } },
   },
   images: ['public/logo.svg'],
 })

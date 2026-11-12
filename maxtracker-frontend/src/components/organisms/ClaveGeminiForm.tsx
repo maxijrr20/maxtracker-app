@@ -43,7 +43,7 @@ export function ClaveGeminiForm({ clave, onGuardar, onQuitar }: ClaveGeminiFormP
   if (clave && !editando) {
     return (
       <div className="flex flex-col gap-3">
-        <div className="flex min-h-tactil items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-950/80 px-3">
+        <div className="flex min-h-tactil items-center gap-3 rounded-2xl border border-linea bg-casilla px-3">
           <ShieldCheck aria-hidden className="size-5 shrink-0 text-exito" />
           <span className="flex-1 font-mono text-sm tracking-wider text-texto">
             <span className="sr-only">Clave guardada que termina en </span>

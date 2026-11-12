@@ -12,10 +12,10 @@ export function Alert({ tono = 'error', children }: { tono?: Tono; children: Rea
     <div
       role={tono === 'error' ? 'alert' : 'status'}
       className={cx(
-        'flex items-start gap-3 rounded-xl border p-4 text-sm',
+        'flex items-start gap-3 rounded-2xl border p-4 text-sm',
         tono === 'error'
-          ? 'border-red-500/30 bg-red-500/10 text-red-200'
-          : 'border-sky-500/30 bg-sky-500/10 text-sky-100',
+          ? 'border-peligro/30 bg-peligro/10 text-texto'
+          : 'border-acento/30 bg-acento/10 text-texto',
       )}
     >
       <Icono aria-hidden className="mt-0.5 size-5 shrink-0" />

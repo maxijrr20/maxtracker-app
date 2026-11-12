@@ -55,12 +55,12 @@ export function RutinasPage() {
 
       {/* Una sola superficie para toda la lista; cada fila es el área táctil completa. */}
       {rutinas && rutinas.length > 0 && (
-        <ul className="superficie borde-degradado flex flex-col divide-y divide-zinc-800/60 p-1">
+        <ul className="superficie borde-degradado flex flex-col divide-y divide-linea-suave p-1">
           {rutinas.map((rutina) => (
             <li key={rutina.id}>
               <Link
                 to={`/rutinas/${rutina.id}`}
-                className="flex min-h-14 items-center gap-3 rounded-xl px-3 py-2 transition-[transform,background-color] duration-150 hover:bg-white/[0.03] active:scale-[0.98]"
+                className="flex min-h-14 items-center gap-3 rounded-2xl px-3 py-2 transition-[transform,background-color] duration-150 hover:bg-white/[0.03] active:scale-[0.98]"
               >
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate text-base font-bold">{rutina.nombre}</span>
@@ -68,10 +68,10 @@ export function RutinasPage() {
                 </div>
                 <Badge mono>
                   {rutina.cantidadEjercicios}
-                  <span aria-hidden className="font-sans font-semibold text-zinc-500">ej.</span>
+                  <span aria-hidden className="font-sans font-semibold text-texto-suave">ej.</span>
                   <span className="sr-only">{rutina.cantidadEjercicios === 1 ? ' ejercicio' : ' ejercicios'}</span>
                 </Badge>
-                <ChevronRight aria-hidden className="size-5 shrink-0 text-zinc-500" />
+                <ChevronRight aria-hidden className="size-5 shrink-0 text-texto-suave" />
               </Link>
             </li>
           ))}

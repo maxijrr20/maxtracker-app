@@ -12,8 +12,8 @@ export interface NavItemProps {
 }
 
 /**
- * Ítem de navegación: ícono + texto siempre visibles. Activo en lima (punto de foco) con un indicador de 2 px
- * (arriba en móvil, a la izquierda desde md) y aria-current; inactivo en zinc-500.
+ * Ítem de navegación: ícono + texto siempre visibles y aria-current. Activo: el ícono se apoya en una píldora cian
+ * tenue (en móvil) o toda la fila se tiñe (desde md); inactivo en texto-suave.
  */
 export function NavItem({ a, icono: Icono, etiqueta, exacto = false }: NavItemProps) {
   return (
@@ -22,25 +22,23 @@ export function NavItem({ a, icono: Icono, etiqueta, exacto = false }: NavItemPr
       end={exacto}
       className={({ isActive }) =>
         cx(
-          'relative flex min-h-14 min-w-tactil flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2',
+          'flex min-h-14 min-w-tactil flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-2',
           'text-xs font-semibold transition-colors duration-150',
-          'md:min-h-tactil md:flex-none md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm',
-          isActive ? 'text-acento md:bg-white/[0.04]' : 'text-zinc-500 hover:text-texto',
+          'md:min-h-tactil md:flex-none md:flex-row md:justify-start md:gap-3 md:rounded-full md:px-3 md:text-sm',
+          isActive ? 'text-acento-claro md:bg-acento/12' : 'text-texto-suave hover:text-texto',
         )
       }
     >
       {({ isActive }) => (
         <>
           <span
-            aria-hidden
             className={cx(
-              'absolute rounded-full bg-acento transition-opacity duration-150',
-              'left-1/2 top-0 h-0.5 w-6 -translate-x-1/2',
-              'md:left-0 md:top-1/2 md:h-5 md:w-0.5 md:translate-x-0 md:-translate-y-1/2',
-              isActive ? 'opacity-100' : 'opacity-0',
+              'grid h-8 w-14 place-items-center rounded-full transition-colors duration-150 md:size-auto',
+              isActive ? 'bg-acento/15 md:bg-transparent' : 'bg-transparent',
             )}
-          />
-          <Icono aria-hidden className="size-6 md:size-5" strokeWidth={isActive ? 2.25 : 1.75} />
+          >
+            <Icono aria-hidden className="size-6 md:size-5" strokeWidth={isActive ? 2.25 : 1.75} />
+          </span>
           <span>{etiqueta}</span>
         </>
       )}

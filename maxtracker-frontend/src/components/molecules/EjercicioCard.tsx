@@ -75,18 +75,18 @@ export function EjercicioCard({
       </div>
 
       {conAvance && (
-        <div aria-hidden className="h-0.5 overflow-hidden rounded-full bg-zinc-800">
+        <div aria-hidden className="h-0.5 overflow-hidden rounded-full bg-linea">
           <div
             className={cx(
               'h-full rounded-full transition-[width] duration-500 ease-out',
-              enCurso || completo ? 'bg-acento' : 'bg-zinc-300',
+              enCurso || completo ? 'bg-acento' : 'bg-texto-medio',
             )}
             style={{ width: `${porcentaje}%` }}
           />
         </div>
       )}
 
-      {children && <div className="flex flex-col gap-2 border-t border-zinc-800/60 pt-2">{children}</div>}
+      {children && <div className="flex flex-col gap-2 border-t border-linea-suave pt-2">{children}</div>}
     </Card>
   )
 }
