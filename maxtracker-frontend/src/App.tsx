@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
 import { RequiereAuth, SoloInvitados } from './auth/guards'
 import { ActualizacionAviso } from './components/organisms/ActualizacionAviso'
+import { ServidorDespertandoAviso } from './components/organisms/ServidorDespertandoAviso'
 import { AuthLayout } from './components/templates/AuthLayout'
 import { MainLayout } from './components/templates/MainLayout'
 import { DashboardPage } from './pages/DashboardPage'
@@ -56,6 +57,7 @@ export default function App() {
     <PreferenciasProvider>
       <AuthProvider>
         <RouterProvider router={router} />
+        <ServidorDespertandoAviso />
         <ActualizacionAviso />
       </AuthProvider>
     </PreferenciasProvider>
