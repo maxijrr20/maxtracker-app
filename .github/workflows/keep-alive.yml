@@ -24,7 +24,9 @@ on:
   schedule:
     # Cada 10 minutos (UTC). Menor que los 15 min de inactividad de Render, con margen
     # para los retrasos del planificador de GitHub.
-    - cron: "*/10 * * * *"
+    # Desfasado al minuto 7 (:07, :17, :27...): en los minutos redondos (:00, :10...) se
+    # concentran los cron de todo GitHub y ahí los retrasos son más frecuentes.
+    - cron: "7-59/10 * * * *"
   # Para lanzarlo a mano desde la pestaña Actions.
   workflow_dispatch:
 
