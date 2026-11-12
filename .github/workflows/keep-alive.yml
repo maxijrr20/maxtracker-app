@@ -1,0 +1,94 @@
+# Keep-alive: ping periódico al health check del backend.
+#
+# Por qué existe:
+#   - Render (plan free) suspende el servicio tras 15 min sin tráfico y el primer
+#     request posterior tarda ~1 min (arranque en frío de la JVM). Un ping cada
+#     10 min lo mantiene despierto.
+#   - El plan free de Render da 750 h/mes de instancia: alcanza para 1 solo servicio
+#     encendido 24/7 (~744 h en un mes de 31 días). Si se agrega otro servicio free,
+#     las horas no alcanzarían para mantener ambos despiertos.
+#   - /actuator/health consulta la BD en cada llamada, así que el ping también genera
+#     actividad en Supabase (plan free), que pausa el proyecto tras ~7 días sin uso.
+#
+# Límites conocidos:
+#   - El cron de GitHub es en UTC y "best effort": puede retrasarse varios minutos
+#     (o saltarse ejecuciones) en horas de alta carga, así que algún arranque en frío
+#     ocasional sigue siendo posible.
+#   - GitHub DESACTIVA los workflows programados si el repo pasa 60 días sin actividad
+#     (commits). Para reactivarlo: pestaña Actions > "Keep-alive" > "Enable workflow".
+#     GitHub avisa por email antes de desactivarlo.
+
+name: Keep-alive
+
+on:
+  schedule:
+    # Cada 10 minutos (UTC). Menor que los 15 min de inactividad de Render, con margen
+    # para los retrasos del planificador de GitHub.
+    - cron: "*/10 * * * *"
+  # Para lanzarlo a mano desde la pestaña Actions.
+  workflow_dispatch:
+
+# Mínimo privilegio: el job no hace checkout ni usa la API de GitHub, así que el
+# GITHUB_TOKEN no recibe ningún permiso.
+permissions: {}
+
+# Una sola ejecución a la vez. cancel-in-progress: false para no cortar un ping que
+# está esperando un arranque en frío; la siguiente queda en cola en vez de solaparse.
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    name: Ping al health check
+    runs-on: ubuntu-latest
+    # Peor caso: 4 intentos x 120 s + 3 esperas de 15 s ≈ 9 min teóricos, pero en la
+    # práctica un arranque en frío responde en ~1-2 min. 5 min evita que un job colgado
+    # consuma minutos de Actions.
+    timeout-minutes: 5
+
+    steps:
+      # Sin actions de terceros (ni siquiera checkout): solo curl, que ya viene en el
+      # runner, así no hay riesgo de supply chain.
+      - name: Ping a /actuator/health
+        env:
+          # Sin secretos: la URL es pública. Se lee de una variable de repositorio
+          # (Settings > Secrets and variables > Actions > Variables > KEEP_ALIVE_URL)
+          # para poder cambiarla sin tocar el código; si no existe, se usa la de Render.
+          # Pasarla por env (y no interpolarla en el script) evita inyección de comandos.
+          KEEP_ALIVE_URL: ${{ vars.KEEP_ALIVE_URL || 'https://maxtracker-api.onrender.com/actuator/health' }}
+        run: |
+          set -uo pipefail
+
+          body_file="$(mktemp)"
+
+          # --fail: códigos HTTP >= 400 hacen fallar curl.
+          # --max-time 120: el arranque en frío de Java en Render puede superar 1 min.
+          # --retry 3 --retry-delay 15 --retry-all-errors: reintenta también ante
+          #   errores HTTP/timeouts (p. ej. 502/503 mientras Render levanta el contenedor).
+          # El cuerpo va a un archivo temporal y NO se imprime: en el log solo quedan
+          # el código HTTP y el tiempo de respuesta.
+          metrics="$(curl --fail --silent --show-error \
+            --max-time 120 \
+            --retry 3 --retry-delay 15 --retry-all-errors \
+            --output "$body_file" \
+            --write-out '%{http_code} %{time_total}' \
+            "$KEEP_ALIVE_URL")"
+          curl_exit=$?
+
+          read -r http_code time_total <<< "${metrics:-000 0}"
+          echo "HTTP ${http_code} en ${time_total}s"
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::error::El health check falló (curl salió con código ${curl_exit}, HTTP ${http_code})."
+            exit 1
+          fi
+
+          # El health de Spring Boot devuelve {"status":"UP"} solo si la app y la BD
+          # están bien. Si no aparece, el job falla y GitHub avisa por email.
+          if ! grep -Eq '"status"[[:space:]]*:[[:space:]]*"UP"' "$body_file"; then
+            echo "::error::La respuesta no contiene \"status\":\"UP\" (HTTP ${http_code})."
+            exit 1
+          fi
+
+          echo "Backend y base de datos activos."

@@ -272,8 +272,8 @@ Errores: `application/problem+json` con `type`, `title`, `status`, `detail`, `ti
 
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
-| Render (plan gratuito) suspende el servicio sin tráfico; el primer request tarda | Espera al abrir la app en el gimnasio | Mostrar estado de "despertando servidor" en la PWA; ping programado al `/actuator/health` |
-| Supabase gratuito pausa proyectos inactivos | BD no disponible tras días sin uso | Uso frecuente de la app; reactivar desde el panel si ocurre |
+| Render (plan gratuito) suspende el servicio sin tráfico; el primer request tarda | Espera al abrir la app en el gimnasio | Workflow `.github/workflows/keep-alive.yml` (GitHub Actions) que hace `GET /actuator/health` cada 10 min y falla (aviso por email) si no responde `"status":"UP"`; las 750 h/mes del plan free alcanzan para 1 servicio 24/7 (~744 h). **Límites:** el cron de GitHub es en UTC y puede retrasarse o saltarse ejecuciones (algún arranque en frío sigue siendo posible), y GitHub desactiva los workflows programados tras 60 días sin commits (reactivar en Actions > Keep-alive > *Enable workflow*). Respaldo: estado de "despertando servidor" en la PWA |
+| Supabase gratuito pausa proyectos inactivos | BD no disponible tras días sin uso | El mismo workflow keep-alive: `/actuator/health` consulta la BD en cada ping, lo que genera actividad diaria muy por debajo del umbral de ~7 días. Mismos límites (retrasos del cron y desactivación tras 60 días sin actividad en el repo); si aun así se pausa, reactivar desde el panel de Supabase |
 | Conexión directa de Supabase es IPv6 y Render no la soporta | Fallo de conexión en producción | Usar la cadena del **Session pooler** (IPv4) desde el Día 1 |
 | wger caído o lento | Catálogo no disponible | Caché, timeouts, 502 controlado y copia local en la tabla `ejercicio` (el historial no depende de wger) |
 | Muchos ejercicios de wger sin traducción al español | Nombres en inglés | Respaldo a inglés + ejercicios personalizados |
