@@ -1,4 +1,4 @@
-import { Activity, CircleUserRound, ClipboardList, Dumbbell, House } from 'lucide-react'
+import { Activity, CalendarCheck, CircleUserRound, ClipboardList, Dumbbell, House } from 'lucide-react'
 
 import { NavItem } from '../molecules/NavItem'
 
@@ -25,6 +25,7 @@ export function BottomNav() {
         <NavItem a="/" exacto icono={House} etiqueta="Inicio" />
         <NavItem a="/rutinas" icono={ClipboardList} etiqueta="Rutinas" />
         <NavItem a="/entrenamiento" icono={Dumbbell} etiqueta="Entrenar" />
+        <NavItem a="/constancia" icono={CalendarCheck} etiqueta="Constancia" />
         <NavItem a="/perfil" icono={CircleUserRound} etiqueta="Perfil" />
       </div>
     </nav>

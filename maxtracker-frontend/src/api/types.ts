@@ -236,3 +236,42 @@ export interface SolicitudAnalisis {
   /** Unidad en la que la IA expresa las cargas. */
   unidadPeso?: 'KG' | 'LB'
 }
+
+// --- Constancia (calendario, plan semanal y rachas) ---
+
+/** Estado de un día del calendario (ver CalculadoraConstancia en el backend). */
+export type EstadoDia = 'ENTRENADO' | 'EXTRA' | 'FALLADO' | 'PENDIENTE' | 'PLANIFICADO' | 'DESCANSO'
+
+export interface DiaConstancia {
+  /** "AAAA-MM-DD" */
+  fecha: string
+  estado: EstadoDia
+}
+
+export interface ResumenConstancia {
+  /** Días con al menos una serie (del plan o extra). */
+  entrenados: number
+  /** Días del plan ya pasados sin entrenar. */
+  fallados: number
+  /** % de días del plan cumplidos; null si no hubo días del plan que evaluar. */
+  cumplimiento: number | null
+}
+
+export interface PlanEntrenamiento {
+  /** Días ISO-8601 ordenados: 1 = lunes … 7 = domingo. */
+  dias: number[]
+  /** "AAAA-MM-DD" */
+  vigenteDesde: string
+}
+
+export interface Constancia {
+  /** "AAAA-MM" */
+  mes: string
+  dias: DiaConstancia[]
+  resumenMes: ResumenConstancia
+  resumenTotal: ResumenConstancia
+  /** null si el usuario aún no tiene plan. */
+  rachaActual: number | null
+  mejorRacha: number | null
+  plan: PlanEntrenamiento | null
+}

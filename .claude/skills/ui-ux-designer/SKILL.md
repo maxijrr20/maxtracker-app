@@ -125,7 +125,9 @@ Fuente mono: **Geist Mono Variable** empaquetada (precacheada por la PWA). Input
 **Cian sólido** (`bg-acento`), solo: la acción primaria de la pantalla y la marca.
 **Cian como texto/trazo** (`text-acento`, `stroke-acento`): navegación activa, anillo de descanso corriendo, borde de la sesión en curso, badge "en curso", RIR ≤ 1, foco de teclado, línea de progreso en gráficos.
 **Cian tenue = selección** (`bg-acento/15 text-acento-claro ring-1 ring-inset ring-acento/40`): chip, segmento o preset elegido. Es el único estilo de "elegido": no uses blanco sólido.
-**Coral**: badge "PR" (`<Badge tono="record">`), cifra y trofeo del récord reciente, punto del mejor valor en `GraficoProgreso` y cifra "Mejor".
+**Coral**: badge "PR" (`<Badge tono="record">`), cifra y trofeo del récord reciente, punto del mejor valor en `GraficoProgreso` y cifra "Mejor", y la **mejor racha** de constancia (es un récord).
+
+**Calendario de constancia** (`CalendarioConstancia`): los días son **estados**, así que usan los colores de estado y siempre con ícono o forma: entrenado `bg-exito/15` + ✓, extra borde punteado `exito` + "+", fallado `bg-peligro/10` + ✗, hoy anillo `ring-acento` (estado vivo), planificado borde punteado `linea`, descanso solo número en `texto-tenue`. La racha actual va en cian (viva) con `Flame`. Los botones de días de la semana van en 4 columnas en móvil (`grid-cols-4 sm:grid-cols-7`): 7 en una fila quedarían por debajo de 48 px.
 
 **Prohibido en cian o coral:** pesos y repeticiones comunes, objetivos, contadores, títulos, íconos decorativos, fondos de sección, marcas normales de gráficos.
 

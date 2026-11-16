@@ -6,6 +6,7 @@ import { ActualizacionAviso } from './components/organisms/ActualizacionAviso'
 import { ServidorDespertandoAviso } from './components/organisms/ServidorDespertandoAviso'
 import { AuthLayout } from './components/templates/AuthLayout'
 import { MainLayout } from './components/templates/MainLayout'
+import { ConstanciaPage } from './pages/ConstanciaPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { EntrenamientoPage } from './pages/EntrenamientoPage'
 import { LoginPage } from './pages/LoginPage'
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
           { path: '/rutinas/:id', element: <RutinaDetallePage /> },
           { path: '/rutinas/:id/editar', element: <RutinaFormPage /> },
           { path: '/entrenamiento', element: <EntrenamientoPage /> },
+          { path: '/constancia', element: <ConstanciaPage /> },
           { path: '/perfil', element: <PerfilPage /> },
         ],
       },
