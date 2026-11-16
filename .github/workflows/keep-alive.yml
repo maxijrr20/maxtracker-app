@@ -1,32 +1,33 @@
-# Keep-alive: ping periódico al health check del backend.
+# Keep-alive de RESPALDO: ping periódico al health check del backend.
 #
-# Por qué existe:
-#   - Render (plan free) suspende el servicio tras 15 min sin tráfico y el primer
-#     request posterior tarda ~1 min (arranque en frío de la JVM). Un ping cada
-#     10 min lo mantiene despierto.
-#   - El plan free de Render da 750 h/mes de instancia: alcanza para 1 solo servicio
-#     encendido 24/7 (~744 h en un mes de 31 días). Si se agrega otro servicio free,
-#     las horas no alcanzarían para mantener ambos despiertos.
-#   - /actuator/health consulta la BD en cada llamada, así que el ping también genera
-#     actividad en Supabase (plan free), que pausa el proyecto tras ~7 días sin uso.
+# El ping principal es externo: cron-job.org hace GET /actuator/health cada 5 min
+# (cuenta del dueño del proyecto) y avisa por email si falla. Render (plan free)
+# suspende el servicio tras 15 min sin tráfico y el arranque en frío de la JVM puede
+# pasar de 90 s, así que hace falta un ping cada < 15 min con puntualidad real.
 #
-# Límites conocidos:
-#   - El cron de GitHub es en UTC y "best effort": puede retrasarse varios minutos
-#     (o saltarse ejecuciones) en horas de alta carga, así que algún arranque en frío
-#     ocasional sigue siendo posible.
-#   - GitHub DESACTIVA los workflows programados si el repo pasa 60 días sin actividad
-#     (commits). Para reactivarlo: pestaña Actions > "Keep-alive" > "Enable workflow".
-#     GitHub avisa por email antes de desactivarlo.
+# Por qué este workflow NO basta como ping principal (medido del 12 al 16/11/2026):
+# con un cron de 10 min, GitHub lo ejecutó cada 3,5-8 h (mediana ~6,5 h). En repos
+# gratuitos con poca actividad el planificador espacia los cron frecuentes y no hay
+# forma de forzarlo.
+#
+# Para qué sirve igual:
+#   - Respaldo si cron-job.org falla o se desactiva: genera actividad en Supabase
+#     (plan free, pausa el proyecto tras ~7 días sin uso), porque /actuator/health
+#     consulta la BD en cada llamada.
+#   - Si el health check falla, el job falla y GitHub avisa por email.
+#
+# Límites: GitHub DESACTIVA los workflows programados si el repo pasa 60 días sin
+# actividad (commits). Para reactivarlo: Actions > "Keep-alive" > "Enable workflow".
+#
+# Horas de Render: 750 h/mes alcanzan para 1 servicio free encendido 24/7 (~744 h).
 
 name: Keep-alive
 
 on:
   schedule:
-    # Cada 10 minutos (UTC). Menor que los 15 min de inactividad de Render, con margen
-    # para los retrasos del planificador de GitHub.
-    # Desfasado al minuto 7 (:07, :17, :27...): en los minutos redondos (:00, :10...) se
-    # concentran los cron de todo GitHub y ahí los retrasos son más frecuentes.
-    - cron: "7-59/10 * * * *"
+    # Cada hora, en el minuto 7 (UTC): pedir más frecuencia no sirve (ver arriba) y en los
+    # minutos redondos se concentran los cron de todo GitHub.
+    - cron: "7 * * * *"
   # Para lanzarlo a mano desde la pestaña Actions.
   workflow_dispatch:
 
