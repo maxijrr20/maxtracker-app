@@ -1,7 +1,7 @@
 import { ArrowLeft, RotateCw } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { listarEjercicios, listarEjerciciosDeMisRutinas } from '../api/ejercicios'
+import { crearEjercicioPropio, eliminarEjercicioPropio, listarEjercicios, listarMisEjercicios } from '../api/ejercicios'
 import { actualizarRutina, crearRutina, obtenerRutina } from '../api/rutinas'
 import type { EjercicioLocal, GuardarRutinaRequest } from '../api/types'
 import { Button } from '../components/atoms/Button'
@@ -9,8 +9,11 @@ import { ButtonLink } from '../components/atoms/ButtonLink'
 import { Spinner } from '../components/atoms/Spinner'
 import { Titulo } from '../components/atoms/Typography'
 import { Alert } from '../components/molecules/Alert'
+import type { GestionEjerciciosPropios } from '../components/organisms/EjercicioSelector'
 import { RutinaForm, type ValoresRutinaForm } from '../components/organisms/RutinaForm'
 import { useCarga } from '../hooks/useCarga'
+
+const GESTION_PROPIOS: GestionEjerciciosPropios = { crear: crearEjercicioPropio, eliminar: eliminarEjercicioPropio }
 
 /** /rutinas/nueva y /rutinas/:id/editar. */
 export function RutinaFormPage() {
@@ -23,7 +26,7 @@ export function RutinaFormPage() {
       const [rutina, locales] = await Promise.all([
         id === null ? Promise.resolve(null) : obtenerRutina(id, signal),
         // Solo enriquece el buscador ("Tus ejercicios"): si falla, se sigue sin ellos.
-        listarEjerciciosDeMisRutinas(signal).catch((): EjercicioLocal[] => []),
+        listarMisEjercicios(signal).catch((): EjercicioLocal[] => []),
       ])
       const inicial: ValoresRutinaForm | undefined = rutina
         ? {
@@ -77,6 +80,7 @@ export function RutinaFormPage() {
           textoGuardar={id === null ? 'Crear rutina' : 'Guardar cambios'}
           buscarCatalogo={listarEjercicios}
           locales={datos.locales}
+          propios={GESTION_PROPIOS}
         />
       )}
     </>

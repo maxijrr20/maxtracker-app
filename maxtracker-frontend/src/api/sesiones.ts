@@ -42,3 +42,8 @@ export async function registrarSerie(sesionId: number, serie: RegistrarSerieRequ
 export async function eliminarSerie(sesionId: number, serieId: number): Promise<void> {
   await http.delete(`/sesiones/${sesionId}/series/${serieId}`)
 }
+
+/** Borra la sesión y todas sus series (no se puede deshacer). */
+export async function eliminarSesion(sesionId: number): Promise<void> {
+  await http.delete(`/sesiones/${sesionId}`)
+}

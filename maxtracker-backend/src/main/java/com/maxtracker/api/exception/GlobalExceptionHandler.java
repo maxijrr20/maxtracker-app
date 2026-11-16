@@ -45,6 +45,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problema(HttpStatus.NOT_FOUND, "Recurso no encontrado", ex.getMessage(), "no-encontrado");
     }
 
+    @ExceptionHandler(EjercicioPersonalizadoDuplicadoException.class)
+    public ProblemDetail manejarEjercicioDuplicado(EjercicioPersonalizadoDuplicadoException ex) {
+        return problema(HttpStatus.CONFLICT, "Ejercicio repetido", ex.getMessage() + ".", "ejercicio-duplicado");
+    }
+
+    @ExceptionHandler(EjercicioEnUsoException.class)
+    public ProblemDetail manejarEjercicioEnUso(EjercicioEnUsoException ex) {
+        return problema(HttpStatus.CONFLICT, "Ejercicio en uso", ex.getMessage() + ".", "ejercicio-en-uso");
+    }
+
     @ExceptionHandler(SesionFinalizadaException.class)
     public ProblemDetail manejarSesionFinalizada(SesionFinalizadaException ex) {
         return problema(HttpStatus.CONFLICT, "Sesión finalizada", ex.getMessage(), "sesion-finalizada");

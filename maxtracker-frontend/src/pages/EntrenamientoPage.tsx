@@ -1,10 +1,17 @@
-import { CircleCheck, Dumbbell, House, ListChecks, Plus, RotateCw, X, Zap } from 'lucide-react'
-import { useState } from 'react'
+import { CircleCheck, Dumbbell, House, ListChecks, Plus, RotateCw, Trash2, X, Zap } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
-import { listarEjercicios, listarEjerciciosDeMisRutinas } from '../api/ejercicios'
+import { crearEjercicioPropio, eliminarEjercicioPropio, listarEjercicios, listarMisEjercicios } from '../api/ejercicios'
 import { ApiError } from '../api/http'
 import { obtenerRutina } from '../api/rutinas'
-import { buscarSesionEnCurso, eliminarSerie, finalizarSesion, iniciarSesion, registrarSerie } from '../api/sesiones'
+import {
+  buscarSesionEnCurso,
+  eliminarSerie,
+  eliminarSesion,
+  finalizarSesion,
+  iniciarSesion,
+  registrarSerie,
+} from '../api/sesiones'
 import type { EjercicioLocal, RefEjercicio, RegistrarSerieRequest, RutinaEjercicio, Serie, Sesion } from '../api/types'
 import { Button } from '../components/atoms/Button'
 import { ButtonLink } from '../components/atoms/ButtonLink'
@@ -15,7 +22,7 @@ import { EjercicioCard } from '../components/molecules/EjercicioCard'
 import { EmptyState } from '../components/molecules/EmptyState'
 import { SerieRow } from '../components/molecules/SerieRow'
 import { DescansoTimer } from '../components/organisms/DescansoTimer'
-import { EjercicioSelector } from '../components/organisms/EjercicioSelector'
+import { EjercicioSelector, type GestionEjerciciosPropios } from '../components/organisms/EjercicioSelector'
 import { RegistrarSerieForm } from '../components/organisms/RegistrarSerieForm'
 import { SesionActivaCard } from '../components/organisms/SesionActivaCard'
 import { TarjetaAnalisisIa } from '../components/molecules/TarjetaAnalisisIa'
@@ -101,9 +108,26 @@ export function EntrenamientoPage() {
   }, [])
 
   // Solo enriquece el buscador ("Tus ejercicios"); si falla, el catálogo sigue disponible.
-  const { datos: locales } = useCarga(
-    (signal) => listarEjerciciosDeMisRutinas(signal).catch((): EjercicioLocal[] => []),
+  const { datos: locales, setDatos: setLocales } = useCarga(
+    (signal) => listarMisEjercicios(signal).catch((): EjercicioLocal[] => []),
     [],
+  )
+
+  // Crear o borrar un ejercicio propio también actualiza "Tus ejercicios": el buscador se desmonta al descartar o
+  // finalizar la sesión y, al volver a abrirse, solo conoce esta lista.
+  const gestionPropios = useMemo<GestionEjerciciosPropios>(
+    () => ({
+      crear: async (nuevo) => {
+        const creado = await crearEjercicioPropio(nuevo)
+        setLocales([...(locales ?? []), creado].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')))
+        return creado
+      },
+      eliminar: async (ejercicioId) => {
+        await eliminarEjercicioPropio(ejercicioId)
+        setLocales((locales ?? []).filter((e) => e.ejercicioId !== ejercicioId))
+      },
+    }),
+    [locales, setLocales],
   )
 
   const [pendientesEnMemoria, setPendientesEnMemoria] = useState<{ sesionId: number; items: EjercicioElegido[] } | null>(null)
@@ -111,6 +135,8 @@ export function EntrenamientoPage() {
   const [seriesRegistradas, setSeriesRegistradas] = useState(0)
   const [confirmandoFin, setConfirmandoFin] = useState(false)
   const [finalizando, setFinalizando] = useState(false)
+  const [confirmandoDescarte, setConfirmandoDescarte] = useState(false)
+  const [descartando, setDescartando] = useState(false)
   const [iniciandoLibre, setIniciandoLibre] = useState(false)
   const [errorAccion, setErrorAccion] = useState<string | null>(null)
   // Al finalizar se pide automáticamente el análisis de la sesión (una vez; luego, a demanda).
@@ -233,6 +259,25 @@ export function EntrenamientoPage() {
     }
   }
 
+  /** Borra la sesión en curso y sus series (p. ej. si se inició sin querer). Dos toques: no se puede deshacer. */
+  async function descartar() {
+    if (!confirmandoDescarte) return setConfirmandoDescarte(true)
+    setDescartando(true)
+    setErrorAccion(null)
+    try {
+      await eliminarSesion(actual.id)
+      guardarPendientes(actual.id, [])
+      setPendientesEnMemoria(null)
+      setSeriesRegistradas(0)
+      setDatos({ sesion: null })
+    } catch (causa) {
+      setErrorAccion(causa instanceof ApiError ? causa.message : 'No se pudo descartar el entrenamiento.')
+    } finally {
+      setDescartando(false)
+      setConfirmandoDescarte(false)
+    }
+  }
+
   const ejercicios = agrupar(actual, pendientes)
   // Ejercicio actual: el primero que no completó su objetivo (o sin series). Único con acción primaria y barra cian.
   const claveActual = actual.finalizada
@@ -351,12 +396,33 @@ export function EntrenamientoPage() {
         </Button>
       )}
 
+      {/* Lejos de las acciones principales y en rojo al confirmar: borra la sesión y todas sus series. */}
+      {enCurso && (
+        <Button
+          variante={confirmandoDescarte ? 'peligro' : 'fantasma'}
+          anchoCompleto
+          icono={Trash2}
+          cargando={descartando}
+          onClick={descartar}
+          onBlur={() => setConfirmandoDescarte(false)}
+        >
+          {confirmandoDescarte
+            ? actual.series.length > 0
+              ? actual.series.length === 1
+                ? '¿Descartar? Se borrará 1 serie'
+                : `¿Descartar? Se borrarán ${actual.series.length} series`
+              : '¿Descartar? Toca otra vez'
+            : 'Descartar entrenamiento'}
+        </Button>
+      )}
+
       <EjercicioSelector
         abierto={selectorAbierto}
         onCerrar={() => setSelectorAbierto(false)}
         onElegir={agregarEjercicio}
         buscarCatalogo={listarEjercicios}
         locales={locales}
+        propios={gestionPropios}
       />
     </>
   )

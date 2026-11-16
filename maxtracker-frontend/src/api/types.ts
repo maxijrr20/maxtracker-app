@@ -112,7 +112,14 @@ export interface GuardarRutinaRequest {
 /** Ejercicio que el usuario ya usó (copia local de wger o personalizado), identificado por su ID local. */
 export interface EjercicioLocal {
   ejercicioId: number
+  /** null = ejercicio propio del usuario (no viene de wger). */
   wgerId: number | null
+  nombre: string
+  categoria: string | null
+}
+
+/** Datos para crear un ejercicio propio. `categoria` es uno de los grupos de lib/categorias, o null. */
+export interface NuevoEjercicioPropio {
   nombre: string
   categoria: string | null
 }

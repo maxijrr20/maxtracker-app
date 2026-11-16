@@ -11,7 +11,7 @@ import { Alert } from '../molecules/Alert'
 import { ContadorField } from '../molecules/ContadorField'
 import { EmptyState } from '../molecules/EmptyState'
 import { FormField } from '../molecules/FormField'
-import { EjercicioSelector, type BuscarCatalogo } from './EjercicioSelector'
+import { EjercicioSelector, type BuscarCatalogo, type GestionEjerciciosPropios } from './EjercicioSelector'
 
 /** Límites del backend (CrearRutinaRequest / RutinaEjercicioRequest). */
 const MAX_NOMBRE = 100
@@ -36,6 +36,8 @@ export interface RutinaFormProps {
   textoGuardar?: string
   buscarCatalogo: BuscarCatalogo
   locales?: EjercicioLocal[]
+  /** Crear y borrar ejercicios propios desde el buscador. */
+  propios?: GestionEjerciciosPropios
 }
 
 /** Ítem con clave estable para React (los ejercicios pueden repetirse y reordenarse). */
@@ -45,7 +47,14 @@ let siguienteClave = 0
 const conClave = (item: ItemRutinaForm): ItemConClave => ({ ...item, clave: siguienteClave++ })
 
 /** Crear o editar una rutina: nombre, descripción y ejercicios en orden con series y repeticiones objetivo. */
-export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina', buscarCatalogo, locales }: RutinaFormProps) {
+export function RutinaForm({
+  inicial,
+  onGuardar,
+  textoGuardar = 'Guardar rutina',
+  buscarCatalogo,
+  locales,
+  propios,
+}: RutinaFormProps) {
   const [nombre, setNombre] = useState(inicial?.nombre ?? '')
   const [descripcion, setDescripcion] = useState(inicial?.descripcion ?? '')
   const [items, setItems] = useState<ItemConClave[]>(() => (inicial?.ejercicios ?? []).map(conClave))
@@ -233,6 +242,7 @@ export function RutinaForm({ inicial, onGuardar, textoGuardar = 'Guardar rutina'
       onElegir={agregar}
       buscarCatalogo={buscarCatalogo}
       locales={locales}
+      propios={propios}
     />
     </>
   )

@@ -142,6 +142,7 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 * La copia local guarda `nombre` y `categoria`, de modo que el historial y las rutinas se pueden mostrar aunque wger esté caído o cambie sus datos.
 * Las copias de wger son compartidas por todos los usuarios (sin dueño); los personalizados pertenecen a un usuario y se borran con él. Un mismo usuario no puede repetir el nombre de un personalizado.
 * Un ejercicio que ya está en una rutina o en una serie no se puede borrar (FK sin cascada), para no perder historial.
+* **Ejercicios propios en la app:** desde el buscador de ejercicios (entrenamiento y formulario de rutinas) se crean con nombre y grupo muscular opcional, y quedan elegidos al instante. Aparecen en "Tus ejercicios" marcados como *Propio*, junto a los de tus rutinas, y se pueden eliminar en dos toques si no tienen historial (`EjercicioPersonalizadoController` → `JpaEjercicioPersonalizadoService`).
 * **Creación de la copia (Día 3):** al registrar una serie con `wgerId`, `ResolutorEjercicio` busca la copia local; si no existe, consulta wger y la guarda en una transacción propia (`REQUIRES_NEW`). Si dos peticiones la crean a la vez, la que pierde en el `UNIQUE (wger_id)` relee la copia ganadora sin invalidar su transacción. Con `ejercicioId` se acepta una copia de wger o un personalizado **propio**; el de otro usuario responde 404.
 
 ### 4.4 Migraciones con Flyway
@@ -172,6 +173,8 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 |---|---|---|---|
 | GET | `/api/v1/ejercicios` | 1 | Catálogo paginado (`pagina`, `tamanio` 1–100, `categoria`) |
 | GET | `/api/v1/ejercicios/{id}` | 1 | Detalle de un ejercicio |
+| GET/POST | `/api/v1/ejercicios/personalizados` | Mejora | Ejercicios propios del usuario (ordenados por nombre) / crear uno: `nombre` (1–150, único por usuario sin distinguir mayúsculas; 409 si se repite) y `categoria` opcional, uno de los grupos del catálogo (Pecho, Espalda, Piernas, Hombros, Brazos, Abdominales, Pantorrillas, Cardio). 201 + `Location`; la respuesta trae el `ejercicioId` que se usa en series y rutinas |
+| DELETE | `/api/v1/ejercicios/personalizados/{id}` | Mejora | Elimina un ejercicio propio (204). 409 si está en una rutina o tiene series; 404 si no existe o es de otro usuario |
 | POST | `/api/v1/auth/register` | 3 | Crea la cuenta y devuelve un JWT (201; 409 si el email existe; 403 si el registro está deshabilitado) |
 | POST | `/api/v1/auth/login` | 3 | Obtiene JWT (401 si las credenciales no son válidas) |
 | GET | `/api/v1/sesiones` | 3 | Historial paginado del usuario (`pagina`, `tamanio` 1–100), sin series |
@@ -179,7 +182,7 @@ Una sola tabla `ejercicio` guarda los dos tipos de ejercicio, para que rutinas y
 | POST | `/api/v1/rutinas` | 4 | Crea una rutina: `nombre` (1–100), `descripcion` (≤500), `ejercicios` opcional (≤30, en orden): cada uno `wgerId` **o** `ejercicioId`, `seriesObjetivo` (1–20) y `repeticionesObjetivo` (1–999) opcionales. 201 + `Location` |
 | GET/PUT/DELETE | `/api/v1/rutinas/{id}` | 4 | Detalle con ejercicios / reemplazo completo (incluida la lista de ejercicios) / eliminar (204; las sesiones que la usaban quedan con `rutinaId = null`) |
 | POST | `/api/v1/sesiones` | 3–4 | Inicia una sesión (`fecha` opcional, por defecto hoy en `APP_ZONA_HORARIA`; `rutinaId`, `notas`). 201 + `Location`. Con `rutinaId`, la respuesta incluye `ejerciciosRutina` (plan de la rutina para precargar la sesión) |
-| GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle con series / editar fecha y notas / eliminar (204) |
+| GET/PUT/DELETE | `/api/v1/sesiones/{id}` | 3 | Detalle con series / editar fecha y notas / eliminar con sus series (204). En la app: botón **Descartar entrenamiento** de la sesión en curso, con confirmación en dos toques |
 | POST | `/api/v1/sesiones/{id}/finalizar` | 3 | Finaliza la sesión (409 si ya lo estaba) |
 | POST | `/api/v1/sesiones/{id}/series` | 3 | Registra una serie: `wgerId` **o** `ejercicioId`, `pesoKg` (0–9999,99), `repeticiones` (1–999), `rir` (0–10, opcional). 201; 409 si la sesión está finalizada |
 | DELETE | `/api/v1/sesiones/{id}/series/{serieId}` | 3 | Quita una serie (204; 409 si la sesión está finalizada) |
